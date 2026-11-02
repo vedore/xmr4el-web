@@ -15,22 +15,18 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
     <script is:inline>
-      try { const t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch {}
+      // Light unless the visitor picked dark with the toggle
+      let t; try { t = localStorage.getItem('theme'); } catch {}
+      document.documentElement.dataset.theme = t || 'light';
     </script>
     <style is:global>
       /* Cool gray / slate page; terracotta accent from the XMR4EL palette */
       :root {
-        color-scheme: light dark;
+        color-scheme: light;
         --bg: #F6F8FA; --surface: #EAEEF2; --text: #1C2330; --muted: #55606E; --line: #D8DEE6;
         --accent: #B8492A; --bar: #8792A0;
         --sans: 'IBM Plex Sans', system-ui, sans-serif;
         --mono: 'IBM Plex Mono', ui-monospace, monospace;
-      }
-      @media (prefers-color-scheme: dark) {
-        :root:not([data-theme='light']) {
-          --bg: #10151C; --surface: #1A212B; --text: #E6EAF0; --muted: #9AA5B3; --line: #2A3340;
-          --accent: #CC7D65; --bar: #5A6573;
-        }
       }
       :root[data-theme='dark'] {
         color-scheme: dark;
@@ -134,7 +130,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     <script is:inline>
       document.getElementById('theme-toggle').addEventListener('click', () => {
         const root = document.documentElement;
-        const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        const dark = root.dataset.theme === 'dark';
         root.dataset.theme = dark ? 'light' : 'dark';
         try { localStorage.setItem('theme', root.dataset.theme); } catch {}
       });

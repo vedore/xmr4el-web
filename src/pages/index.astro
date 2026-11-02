@@ -47,14 +47,12 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
     </div>
     <script is:inline define:vars={{ base }}>
       const v = document.querySelector('.player');
-      const scheme = matchMedia('(prefers-color-scheme: dark)');
       // Reduced motion: no autoplay; click toggles play/pause either way
       const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
       v.autoplay = !reduce;
       v.addEventListener('click', () => (v.paused ? v.play() : v.pause()));
       const pick = () => {
-        const t = document.documentElement.dataset.theme;
-        const dark = t ? t === 'dark' : scheme.matches;
+        const dark = document.documentElement.dataset.theme === 'dark';
         const src = `${base}/recordings/xmr4el-tui-demo-notebook${dark ? '' : '-light'}.mp4`;
         if (v.getAttribute('src') === src) return;
         // Theme swap: resume the new recording where the old one was, playing or paused
@@ -67,7 +65,6 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
       };
       pick();
       new MutationObserver(pick).observe(document.documentElement, { attributeFilter: ['data-theme'] });
-      scheme.addEventListener('change', pick);
 
       // [start second, screen list index]; gaps between screens keep the previous highlight
       const segments = [[0, 0], [3.8, 1], [14.4, 2], [19.4, 3], [30.76, 4], [36.36, 5], [40.36, 6], [54.36, 5], [58.36, 0]];

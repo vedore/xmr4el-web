@@ -51,15 +51,13 @@ const pecosGroups = [
 <Base title="Benchmarks · XMR4EL">
   <h1>Benchmark — 2 November 2026</h1>
   <p class="lead">
-    Recorded results on NCBI-disease and BC5CDR-chemical, compared with nearest-neighbour retrieval
-    and PECOS XR-Linear.
+    One configuration, two datasets, three comparators, and every caveat we could find.
   </p>
   <p>
-    XMR4EL is a configurable research framework for biomedical entity linking. Compared with SapBERT
-    1-NN, it has higher accuracy on ambiguous mention keys — those seen in training with multiple
-    labels — in both datasets. Overall accuracy is higher on NCBI-disease and lower on BC5CDR-chemical.
-    These results support further study of ambiguous mentions; the benchmark covers one trained tree
-    per dataset.
+    XMR4EL beats SapBERT 1-NN on NCBI-disease and trails it on BC5CDR-chemical. On ambiguous mention
+    keys, those seen in training with more than one label, it does better on both. There is one trained
+    tree per dataset and no repeated seeds, so treat this as evidence worth following up, not a final
+    ranking.
   </p>
   <p class="muted">
     Source: <a href="https://github.com/lasigeBioTM/XMR4EL/blob/main/BENCHMARK.md" target="_blank" rel="noopener">XMR4EL benchmark report</a>.

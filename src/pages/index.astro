@@ -20,22 +20,27 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
 <Base>
   <section id="demo" class="wide">
     <p class="eyebrow wip">Work in progress</p>
-    <h1>A configurable research framework for biomedical entity linking.</h1>
+    <h1>Linking biomedical mentions to the concepts they actually mean.</h1>
+    <p class="sub">
+      XMR4EL treats entity linking as extreme multi-label ranking: a learned tree of concepts decides which
+      of thousands of IDs are worth ranking for each mention. It is open research software for finding out where that helps,
+      and where a nearest-neighbour lookup was enough all along.
+    </p>
     <div class="stage">
       <!-- TUI recording: Notebook (dark) / Notebook light, swapped with the theme -->
       <video class="player" muted loop playsinline aria-label="Recording of the XMR4EL terminal UI"></video>
       <div class="showcase">
         <p class="eyebrow">Terminal UI</p>
-        <!-- Placeholder descriptions, paraphrased from the XMR4EL README. Buttons seek the recording. -->
+        <!-- Descriptions from XMR4EL docs/TUI.md. Buttons seek the recording. -->
         <button type="button" class="step" data-step="-1" aria-label="Previous screen">←</button>
         <ol class="screens">
-          <li><button type="button" aria-current="true"><b>Dashboard</b><small>Saved trees by dataset, their evaluations and runs; active runs.</small></button></li>
-          <li><button type="button"><b>Results</b><small>Compare a baseline with challenger trees.</small></button></li>
-          <li><button type="button"><b>Dataset Setup</b><small>Pick a dataset.</small></button></li>
-          <li><button type="button"><b>Model Builder</b><small>Build one or more model configs.</small></button></li>
-          <li><button type="button"><b>Review Batch</b><small>Review and launch a batch.</small></button></li>
-          <li><button type="button"><b>Batch Monitor</b><small>Execution queue, the selected tree's live log, Stop Batch.</small></button></li>
-          <li><button type="button"><b>Run Monitor</b><small>Pipeline stages, resources, live logs.</small></button></li>
+          <li><button type="button" aria-current="true"><b>Dashboard</b><small>Every saved tree, grouped by dataset, with its evaluations and any runs still going.</small></button></li>
+          <li><button type="button"><b>Results</b><small>Pin a baseline, add challengers. Deltas appear only when the runs are actually comparable.</small></button></li>
+          <li><button type="button"><b>Dataset Setup</b><small>Pick a recognised dataset or register your own PubTator files, then map the splits.</small></button></li>
+          <li><button type="button"><b>Model Builder</b><small>Configure one or more trees; each edit is validated before it is applied.</small></button></li>
+          <li><button type="button"><b>Review Batch</b><small>See how the trees differ, fix issues, launch. Launching takes two keypresses, on purpose.</small></button></li>
+          <li><button type="button"><b>Batch Monitor</b><small>Execution order, the selected tree's live log, and a Stop that asks first.</small></button></li>
+          <li><button type="button"><b>Run Monitor</b><small>One run's pipeline stages, resource use and live log, stage by stage.</small></button></li>
         </ol>
         <button type="button" class="step" data-step="1" aria-label="Next screen">→</button>
       </div>
@@ -93,14 +98,15 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
 
   <section id="what">
     <h2>What it does</h2>
-    <p class="lead">Link biomedical mentions to concept identifiers.</p>
+    <p class="lead">“AS” goes in. <code>MESH:D013167</code> comes out. Ideally.</p>
     <p>
-      XMR4EL applies extreme multi-label ranking to biomedical entity linking. Given a mention and the
-      surrounding words, it ranks candidate concepts from a large vocabulary, such as MeSH identifiers or
-      UMLS CUIs.
+      Entity linking maps a mention in text to an identifier in a vocabulary such as MeSH or UMLS, so every
+      way of writing a concept ends up at the same ID. XMR4EL frames it as extreme multi-label ranking:
+      each concept is a label, and the model ranks them for a mention using the mention and the words
+      around it.
     </p>
-    <p>It works with mentions you provide; mention detection is a separate step.</p>
-    <!-- Worked example from src/data/home-examples.json. Labels and caption are placeholders for user copy -->
+    <p>It links mentions you already have. Finding them in the text is a separate step, outside this project.</p>
+    <!-- Worked example from src/data/home-examples.json -->
     <figure class="example">
       <p class="eyebrow">Example · NCBI-disease test set, PMID {we.source.doc_id}</p>
       <blockquote>{parts(we.sentence, we.mention).map((t, i) => (i % 2 ? <mark>{t}</mark> : t))}</blockquote>
@@ -115,25 +121,26 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
         ))}
       </ol>
       <figcaption>
-        In the training data, "AS" is labelled 10 times as ankylosing spondylitis and 11 times as Angelman
-        syndrome. This abstract defines "ankylosing spondylitis (AS)" earlier, so preprocessing appends the
-        expansion to the query. Scores are raw ranking scores, comparable only within one query.
+        In the training data, “AS” is close to a coin toss: 10 annotations say ankylosing spondylitis, 11
+        say Angelman syndrome. Most of the credit goes to the abstract, which spelled out “ankylosing
+        spondylitis (AS)” earlier; preprocessing appends that expansion to the query shown above. Scores
+        are raw ranking scores, comparable only within one query.
       </figcaption>
     </figure>
   </section>
 
   <section id="where" class="band">
     <h2>Where it helps</h2>
-    <p class="lead">Study how representations and label hierarchies affect entity linking.</p>
+    <p class="lead">Biomedical names are many-to-many. That is the whole problem.</p>
     <p>
-      Biomedical concepts appear under different names, abbreviations and spelling variants. The same name
-      can also refer to different concepts, making context important.
+      In one corpus, a single disease turns up under at least four names, and a single abbreviation names
+      two different diseases. Both cards below are straight from NCBI-disease gold annotations.
     </p>
     <p>
-      XMR4EL gives researchers a configurable framework for studying these challenges: combining
-      representations, training label hierarchies and comparing ranking settings on annotated corpora.
+      XMR4EL is built for studying that mess: combine representations, train label hierarchies, change
+      ranking settings, and compare the results on annotated corpora.
     </p>
-    <!-- Examples from src/data/home-examples.json (NCBI-disease gold annotations). Headings are working labels -->
+    <!-- Examples from src/data/home-examples.json (NCBI-disease gold annotations) -->
     <div class="cards">
       <article>
         <h3>One concept, many names</h3>
@@ -158,32 +165,32 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
 
   <section id="how">
     <h2>How it works</h2>
-    <p class="lead">Represent the mention. Organise the labels. Search the hierarchy.</p>
+    <p class="lead">Organise the concepts into a tree. Search only the promising branches.</p>
     <ol class="pipeline">
       <li>
         <h3>Read the data.</h3>
-        <p>Load annotated mentions and a configurable window of surrounding words.</p>
+        <p>Load annotated mentions with a configurable window of surrounding words, expanding abbreviations the document defines.</p>
       </li>
       <li>
         <h3>Encode the text.</h3>
         <p>
-          The default representation combines SapBERT mention embeddings, character TF-IDF features and
-          context TF-IDF features.
+          By default, three views side by side: SapBERT mention embeddings, character TF-IDF for spelling,
+          and TF-IDF over the context words.
         </p>
       </li>
       <li>
         <h3>Build the hierarchy.</h3>
-        <p>Aggregate training examples into label representations and cluster them into a tree.</p>
+        <p>Aggregate each concept's training texts into a label embedding (PIFA) and cluster the labels into a tree.</p>
       </li>
       <li>
         <h3>Train the rankers.</h3>
-        <p>Learn classifiers that route queries through the hierarchy and rank concepts within its leaves.</p>
+        <p>Train a matcher at each node: upper ones route queries down the tree, leaf ones rank the concepts.</p>
       </li>
       <li>
         <h3>Retrieve candidate concepts.</h3>
         <p>
-          Search the tree with beam search and reweight candidates using mention similarity to training
-          examples. Reweighting is enabled in the supplied configuration.
+          Beam search keeps the best branches, then candidates are reweighted by similarity to training
+          mentions. Turning that off costs up to 34 points of Acc@1 (<a href={`${base}/benchmarks/#ablation`}>ablation</a>).
         </p>
       </li>
     </ol>
@@ -220,39 +227,42 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
 
   <section id="now" class="band">
     <h2>What it accomplishes today</h2>
-    <p class="lead">A working workflow from training data to inspectable experiments.</p>
-    <!-- Card headings are working labels; final copy from the user -->
+    <p class="lead">It runs end to end today, from training file to a comparison you can defend.</p>
     <div class="cards">
       <article>
         <h3>Train &amp; evaluate</h3>
         <p>
-          Train and save models, rank candidate concepts and evaluate held-out datasets through command-line
-          scripts or the Python API.
+          Train and save a tree, rank candidates and score held-out data, from command-line scripts or the
+          Python API. Reports Acc@1, MRR, recall@k and candidate recall.
         </p>
       </article>
       <article>
-        <h3>Terminal UI</h3>
+        <h3>A terminal UI with standards</h3>
         <p>
-          The optional terminal interface lets you configure experiment batches, browse saved trees, monitor
-          pipeline stages, resources and logs, and compare evaluations with checks on their compatibility.
+          Optional. Configure experiment batches, watch them run, and compare evaluations. It withholds
+          deltas when the evidence says two runs aren't comparable, which is more than most spreadsheets do.
         </p>
       </article>
       <article>
-        <h3>Reproducibility</h3>
+        <h3>Runs that keep receipts</h3>
         <p>
-          Experiments launched through the experiment runner or terminal interface preserve configurations,
-          input hashes, code state, package versions and metrics to support reproducibility.
+          Runs launched through the experiment runner or the UI record configuration, input hashes, code
+          state, package versions and metrics. Future you will want to know which config that was.
         </p>
       </article>
     </div>
+    <p class="muted scope">
+      Not included: mention detection, a knowledge-base lookup service or a serving API. A cross-encoder
+      reranker exists, but it is experimental and separate from the main prediction path.
+    </p>
   </section>
 
   <section id="results">
     <h2>How well it does</h2>
-    <p class="lead">Encouraging results on ambiguous mentions, with overall accuracy varying by dataset.</p>
+    <p class="lead">Best of four on diseases. Beaten by nearest neighbours on chemicals.</p>
     <p>
-      The 2 November 2026 benchmark evaluates NCBI-disease and BC5CDR-chemical against nearest-neighbour
-      retrieval and PECOS XR-Linear. Both datasets use the same model configuration.
+      The 2 November 2026 benchmark runs one model configuration on NCBI-disease and BC5CDR-chemical,
+      against two nearest-neighbour baselines and PECOS XR-Linear.
     </p>
     <!-- Same numbers as the table below, which is the accessible view -->
     <div class="chart" aria-hidden="true">
@@ -306,26 +316,30 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
       </table>
     </div>
     <p>
-      On NCBI-disease, XMR4EL achieves higher accuracy than the three comparators. On BC5CDR-chemical, both
-      nearest-neighbour methods achieve higher accuracy. XMR4EL performs better than SapBERT 1-NN on
-      mention keys seen with multiple training labels in both datasets. These keys are lowercased and
-      stripped after abbreviation expansion.
+      Where XMR4EL earns its keep on both datasets is ambiguity. On mentions seen in training with more
+      than one label, it beats SapBERT 1-NN on the test sets: 0.818 vs 0.394 on NCBI-disease, 0.811 vs
+      0.649 on BC5CDR-chemical. Those groups hold only 33 and 111 mentions, so read them as a lead, not a
+      verdict.
+    </p>
+    <p>
+      Scores cover mentions whose concept has training text, so they are not directly comparable with
+      published numbers that score every mention against a full ontology.
     </p>
     <p class="cta">
-      <a href={`${base}/benchmarks/`}>Explore the benchmark</a>
+      <a href={`${base}/benchmarks/`}>Read the full benchmark</a>
       <span>
-        See the complete results, retrieval metrics, reweighting ablation, resource measurements and
-        reproduction instructions for this run.
+        Every metric, the reweighting ablation, run costs, the limitations we know about, and how to
+        reproduce it.
       </span>
     </p>
   </section>
 
   <section id="try" class="band">
     <h2>Try it</h2>
-    <p class="lead">Run locally, from the terminal or Python.</p>
+    <p class="lead">Four commands to the terminal UI. Datasets not included.</p>
     <p>
-      Clone the repository and install the locked dependencies with Python 3.12+ and uv. Add the optional
-      terminal interface to configure and inspect experiments interactively.
+      You need Python 3.12+ and uv. The first transformer run downloads SapBERT from Hugging Face unless
+      you already have it cached.
     </p>
     <div class="code">
     <pre><code>git clone https://github.com/lasigeBioTM/XMR4EL.git
@@ -347,31 +361,25 @@ uv sync --locked --extra tui
       });
     </script>
     <p>
-      Datasets are downloaded separately. The repository includes preparation instructions, model
-      configurations and examples for training and evaluation.
+      Bring your own corpora as local PubTator files. In the UI, pick a dataset, build a model
+      configuration and launch; Run Monitor shows each pipeline stage as it happens.
     </p>
     <p>
-      Prepare a dataset, configure a model and launch your first experiment. Use the terminal interface to
-      follow its progress, inspect logs and explore completed evaluations.
-    </p>
-    <p>
-      See the <a href="https://github.com/lasigeBioTM/XMR4EL#readme" target="_blank" rel="noopener">README</a> for installation details,
-      dataset preparation, command-line training and Python API examples.
+      The <a href="https://github.com/lasigeBioTM/XMR4EL#readme" target="_blank" rel="noopener">README</a> covers
+      dataset preparation, command-line training and evaluation, the Python API and Docker.
     </p>
   </section>
 
   <section id="cite">
     <h2>Who made it &amp; how to cite</h2>
-    <p class="lead">Open-source research software.</p>
+    <p class="lead">Open source under MIT. Issues welcome; bugs less so.</p>
     <p>
-      XMR4EL was created by João Vedor and is hosted in the lasigeBioTM GitHub organisation. The code is
-      available under the MIT licence.
+      XMR4EL was created by João Vedor and is hosted in the lasigeBioTM GitHub organisation.
     </p>
     <p>
-      When using XMR4EL in research, reference the repository and the exact version or commit used, together
-      with your model configuration and dataset protocol.
+      If you use it in research, cite the repository with the exact commit, plus your model configuration
+      and dataset protocol. The numbers depend on all three.
     </p>
-    <p>Explore the source, report an issue or contribute on GitHub.</p>
     <ul>
       <li><a href="https://github.com/lasigeBioTM/XMR4EL" target="_blank" rel="noopener">Repository</a></li>
       <li><a href="https://github.com/lasigeBioTM/XMR4EL/issues" target="_blank" rel="noopener">Issues</a></li>
@@ -383,6 +391,9 @@ uv sync --locked --extra tui
 <style>
   .wip { color: var(--accent); margin: 2.5rem 0 0.6rem; }
   .wip + h1 { margin-top: 0; }
+  #demo h1:has(+ .sub) { margin-bottom: 0.75rem; }
+  .sub { max-width: 62ch; margin: 0 0 2rem; font-size: 1.15rem; color: var(--muted); }
+  .scope { margin: 1rem 0 0; font-size: 0.9rem; }
   /* Section rhythm: numbered mono eyebrow (the h2), lead as the headline, alternating full-bleed bands */
   #demo { counter-reset: sec; margin-bottom: 0; }
   section:not(#demo) { counter-increment: sec; margin-block: 0; padding-block: 3.5rem; }

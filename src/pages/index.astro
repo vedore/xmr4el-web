@@ -62,7 +62,7 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
       scheme.addEventListener('change', pick);
 
       // [start second, screen list index]; gaps between screens keep the previous highlight
-      const segments = [[0, 0], [6, 1], [18, 2], [23, 3], [36, 4], [43, 5], [47, 6], [64, 5], [68, 0]];
+      const segments = [[0, 0], [3.8, 1], [14.4, 2], [19.4, 3], [30.76, 4], [36.36, 5], [40.36, 6], [54.36, 5], [58.36, 0]];
       const items = [...document.querySelectorAll('.screens button')];
       items.forEach((b, i) => b.addEventListener('click', () => {
         v.currentTime = segments.find(([, j]) => j === i)[0];

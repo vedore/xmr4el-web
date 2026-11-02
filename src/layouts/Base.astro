@@ -1,4 +1,9 @@
 ---
+import '@fontsource/ibm-plex-sans/400.css';
+import '@fontsource/ibm-plex-sans/600.css';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/600.css';
+
 const { title = 'XMR4EL' } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
@@ -8,14 +13,132 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
+    <script is:inline>
+      try { const t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch {}
+    </script>
+    <style is:global>
+      /* Cool gray / slate page; terracotta accent from the XMR4EL palette */
+      :root {
+        color-scheme: light dark;
+        --bg: #F6F8FA; --surface: #EAEEF2; --text: #1C2330; --muted: #55606E; --line: #D8DEE6;
+        --accent: #B8492A; --bar: #8792A0;
+        --sans: 'IBM Plex Sans', system-ui, sans-serif;
+        --mono: 'IBM Plex Mono', ui-monospace, monospace;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme='light']) {
+          --bg: #10151C; --surface: #1A212B; --text: #E6EAF0; --muted: #9AA5B3; --line: #2A3340;
+          --accent: #CC7D65; --bar: #5A6573;
+        }
+      }
+      :root[data-theme='dark'] {
+        color-scheme: dark;
+        --bg: #10151C; --surface: #1A212B; --text: #E6EAF0; --muted: #9AA5B3; --line: #2A3340;
+        --accent: #CC7D65; --bar: #5A6573;
+      }
+      :root[data-theme='light'] { color-scheme: light; }
+
+      * { box-sizing: border-box; }
+      html { scroll-padding-top: 4.5rem; }
+      body { margin: 0; background: var(--bg); color: var(--text); font: 1.0625rem/1.65 var(--sans); }
+      a { color: var(--accent); }
+      main { padding: 0 16px; container-type: inline-size; }
+      main > * { max-width: 52rem; margin-inline: auto; }
+      main > .wide { max-width: 84rem; }
+      section { margin-bottom: 4rem; }
+      h1, h2, h3 { line-height: 1.25; font-weight: 600; }
+
+      .site-header { position: sticky; top: 0; z-index: 1; background: var(--bg); border-bottom: 1px solid var(--line); }
+      .site-header > div { max-width: 84rem; margin: 0 auto; padding: 0.75rem 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 1.5rem; }
+      .wordmark { font: 600 1.1rem var(--mono); color: var(--text); text-decoration: none; }
+      .wordmark span { color: var(--accent); }
+      .site-header nav { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 1.5rem; font: 0.9rem var(--mono); }
+      .site-header nav div { display: flex; gap: 0.25rem 1.75rem; }
+      .site-header .ext { margin-left: auto; gap: 1.25rem; }
+      .site-header nav a { color: var(--muted); text-decoration: none; }
+      .site-header nav a:hover, .site-header nav a[aria-current] { color: var(--accent); }
+      @media (max-width: 760px) {
+        /* Wordmark, Benchmarks, GitHub and toggle fit one row at 375px */
+        .site-header > div { gap: 0.25rem 0.75rem; }
+        .site-header .sections { display: none; }
+        .site-header nav { font-size: 0.8rem; }
+        .site-header .ext { gap: 0.9rem; }
+        .wordmark { font-size: 1rem; }
+        #theme-toggle { font-size: 0.78rem; padding: 0.2rem 0.45rem; }
+      }
+      #theme-toggle { font: 0.85rem var(--mono); color: var(--text); background: none; border: 1px solid var(--line); padding: 0.2rem 0.6rem; cursor: pointer; }
+      #theme-toggle:hover { border-color: var(--accent); }
+
+      #demo h1 { font-size: clamp(1.9rem, 4.5vw, 3rem); line-height: 1.15; max-width: 22ch; margin: 2.5rem 0 2rem; }
+      .stage { display: grid; grid-template-columns: minmax(0, 7fr) minmax(16rem, 3fr); gap: 3rem; align-items: start; }
+      .player { display: block; width: 100%; aspect-ratio: 1408 / 790; background: var(--surface); border: 1px solid var(--line); }
+      .eyebrow { font: 0.78rem var(--mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 0.6rem; }
+      .screens { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+      .screens li { border-bottom: 1px solid var(--line); }
+      .screens button { display: block; width: 100%; text-align: left; font: inherit; color: inherit; background: none; border: 0; border-left: 3px solid transparent; padding: 0.7rem 0.6rem; cursor: pointer; }
+      .screens button:hover { background: var(--surface); }
+      .screens button[aria-current] { border-left-color: var(--accent); }
+      .screens b { display: block; font: 600 0.98rem/1.4 var(--mono); }
+      .screens small { display: block; color: var(--muted); font-size: 0.9rem; line-height: 1.45; margin-top: 0.15rem; }
+      @media (max-width: 760px) {
+        .stage { grid-template-columns: 1fr; }
+        .showcase { order: -1; }
+      }
+
+      .lead { font-size: 1.15rem; font-weight: 600; }
+      .muted { color: var(--muted); }
+      .cta a { font-size: 1.15rem; font-weight: 600; }
+      .cta span { display: block; color: var(--muted); }
+      code, pre { font-family: var(--mono); font-size: 0.9em; }
+      pre { overflow-x: auto; padding: 1rem; background: var(--surface); border: 1px solid var(--line); }
+      .table-wrap { overflow-x: auto; margin: 1rem 0; }
+      table { border-collapse: collapse; font-size: 0.9rem; }
+      caption { text-align: left; font-weight: 600; padding-bottom: 0.5rem; }
+      th, td { padding: 0.3rem 0.6rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+      td strong { color: var(--accent); }
+      .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    </style>
   </head>
   <body>
-    <header>
-      <nav>
-        <a href={`${base}/`}>XMR4EL</a>
-        <a href="https://github.com/lasigeBioTM/XMR4EL">GitHub</a>
-      </nav>
+    <header class="site-header">
+      <div>
+        <a class="wordmark" href={`${base}/`}>XMR<span>4</span>EL</a>
+        <nav aria-label="Site">
+          <div class="sections">
+            <a href={`${base}/#what`}>What</a>
+            <a href={`${base}/#how`}>How</a>
+            <a href={`${base}/#results`}>Results</a>
+            <a href={`${base}/#try`}>Try</a>
+            <a href={`${base}/#cite`}>Cite</a>
+          </div>
+          <div class="ext">
+            <a href={`${base}/benchmarks/`}>Benchmarks</a>
+            <a href="https://github.com/lasigeBioTM/XMR4EL">GitHub</a>
+          </div>
+        </nav>
+        <button id="theme-toggle" type="button">Light / dark</button>
+      </div>
     </header>
     <main><slot /></main>
+    <script is:inline>
+      document.getElementById('theme-toggle').addEventListener('click', () => {
+        const root = document.documentElement;
+        const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        root.dataset.theme = dark ? 'light' : 'dark';
+        try { localStorage.setItem('theme', root.dataset.theme); } catch {}
+      });
+
+      // Highlight the section link for the part of the home page in view
+      const links = [...document.querySelectorAll('.sections a')];
+      const targets = links.map((a) => document.getElementById(a.hash.slice(1)));
+      const mark = () => {
+        let cur;
+        targets.forEach((s, i) => { if (s && s.getBoundingClientRect().top < innerHeight / 3) cur = links[i]; });
+        if (cur && innerHeight + scrollY >= document.documentElement.scrollHeight - 2) cur = links.at(-1);
+        links.forEach((a) => (a === cur ? a.setAttribute('aria-current', 'location') : a.removeAttribute('aria-current')));
+      };
+      addEventListener('scroll', mark, { passive: true });
+      mark();
+    </script>
   </body>
 </html>

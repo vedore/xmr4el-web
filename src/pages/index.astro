@@ -1,44 +1,473 @@
 ---
 import Base from '../layouts/Base.astro';
+import ex from '../data/home-examples.json';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// Test Acc@1 from the results table below (validation run of 2 November 2026)
+const systems = ['XMR4EL', 'SapBERT 1-NN', 'Character TF-IDF 1-NN', 'PECOS XR-Linear'];
+const acc = { 'NCBI-disease': [89.5, 87.4, 82.6, 82.8], 'BC5CDR-chemical': [93.3, 95.2, 96.1, 81.2] };
+
+// Split a sentence around whole-word occurrences of a mention; odd parts are the mention
+const parts = (text, m) => text.split(new RegExp(`\\b(${m})\\b`));
+const we = ex.worked_example;
+
+// Illustrative beam search: root, 3 clusters, 9 leaves. k = kept by the beam, x = dropped, win = final leaf
+const nodes = [{ x: 180, y: 14, cls: 'root' }];
+[60, 180, 300].forEach((x, i) => nodes.push({ x, y: 70, p: 0, cls: i < 2 ? 'k1' : 'x1' }));
+['x2', 'x2', 'k2', 'k2 win', 'x2', 'x2', 'x1', 'x1', 'x1'].forEach((cls, i) =>
+  nodes.push({ x: 20 + 40 * i, y: 126, p: 1 + Math.floor(i / 3), cls, leaf: true }));
 ---
 <Base>
-  <section id="demo">
-    <h1>XMR4EL</h1>
-    <!-- TUI recording (asciinema) goes here -->
+  <section id="demo" class="wide">
+    <h1>A configurable research framework for biomedical entity linking.</h1>
+    <div class="stage">
+      <!-- TUI recording: Notebook (dark) / Notebook light, swapped with the theme -->
+      <video class="player" muted loop playsinline aria-label="Recording of the XMR4EL terminal UI"></video>
+      <div class="showcase">
+        <p class="eyebrow">Terminal UI</p>
+        <!-- Placeholder descriptions, paraphrased from the XMR4EL README. Buttons seek the recording. -->
+        <ol class="screens">
+          <li><button type="button"><b>Dashboard</b><small>Saved trees by dataset, their evaluations and runs; active runs.</small></button></li>
+          <li><button type="button"><b>Results</b><small>Compare a baseline with challenger trees.</small></button></li>
+          <li><button type="button"><b>Dataset Setup</b><small>Pick a dataset.</small></button></li>
+          <li><button type="button"><b>Model Builder</b><small>Build one or more model configs.</small></button></li>
+          <li><button type="button"><b>Review Batch</b><small>Review and launch a batch.</small></button></li>
+          <li><button type="button"><b>Batch Monitor</b><small>Execution queue, the selected tree's live log, Stop Batch.</small></button></li>
+          <li><button type="button"><b>Run Monitor</b><small>Pipeline stages, resources, live logs.</small></button></li>
+        </ol>
+      </div>
+    </div>
+    <script is:inline define:vars={{ base }}>
+      const v = document.querySelector('.player');
+      const scheme = matchMedia('(prefers-color-scheme: dark)');
+      // Reduced motion: no autoplay; click toggles play/pause either way
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      v.autoplay = !reduce;
+      v.addEventListener('click', () => (v.paused ? v.play() : v.pause()));
+      const pick = () => {
+        const t = document.documentElement.dataset.theme;
+        const dark = t ? t === 'dark' : scheme.matches;
+        const src = `${base}/recordings/xmr4el-tui-demo-notebook${dark ? '' : '-light'}.mp4`;
+        if (v.getAttribute('src') === src) return;
+        // Theme swap: resume the new recording where the old one was, playing or paused
+        const at = v.currentTime, playing = !v.paused;
+        v.src = src;
+        if (at) v.addEventListener('loadedmetadata', () => {
+          v.currentTime = at;
+          playing ? v.play() : v.pause();
+        }, { once: true });
+      };
+      pick();
+      new MutationObserver(pick).observe(document.documentElement, { attributeFilter: ['data-theme'] });
+      scheme.addEventListener('change', pick);
+
+      // [start second, screen list index]; gaps between screens keep the previous highlight
+      const segments = [[0, 0], [6, 1], [18, 2], [23, 3], [36, 4], [43, 5], [47, 6], [64, 5], [68, 0]];
+      const items = [...document.querySelectorAll('.screens button')];
+      items.forEach((b, i) => b.addEventListener('click', () => {
+        v.currentTime = segments.find(([, j]) => j === i)[0];
+        v.play();
+      }));
+      v.addEventListener('timeupdate', () => {
+        const cur = items[segments.findLast(([t]) => t <= v.currentTime)[1]];
+        items.forEach((b) => b.toggleAttribute('aria-current', b === cur));
+      });
+      // "See it in the TUI" links: data-screen is a screen list index
+      document.addEventListener('click', (e) => {
+        const a = e.target.closest('[data-screen]');
+        if (!a) return;
+        e.preventDefault();
+        items[a.dataset.screen].click();
+        document.getElementById('demo').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
+      });
+    </script>
   </section>
 
   <section id="what">
     <h2>What it does</h2>
-    <p>TODO</p>
+    <p class="lead">Link biomedical mentions to concept identifiers.</p>
+    <p>
+      XMR4EL applies extreme multi-label ranking to biomedical entity linking. Given a mention and the
+      surrounding words, it ranks candidate concepts from a large vocabulary, such as MeSH identifiers or
+      UMLS CUIs.
+    </p>
+    <p>It works with mentions you provide; mention detection is a separate step.</p>
+    <!-- Worked example from src/data/home-examples.json. Labels and caption are placeholders for user copy -->
+    <figure class="example">
+      <p class="eyebrow">Example · NCBI-disease test set, PMID {we.source.doc_id}</p>
+      <blockquote>{parts(we.sentence, we.mention).map((t, i) => (i % 2 ? <mark>{t}</mark> : t))}</blockquote>
+      <p class="query"><span>Query</span> {we.query}</p>
+      <ol>
+        {we.candidates.map((c) => (
+          <li class:list={{ gold: c.id === we.gold.id }}>
+            <span class="rank">{c.rank}</span>
+            <span>{c.name} <code>{c.id}</code>{c.id === we.gold.id && <small>gold</small>}</span>
+            <span class="num">{Math.round(c.score).toLocaleString('en')}</span>
+          </li>
+        ))}
+      </ol>
+      <figcaption>
+        In the training data, "AS" is labelled 10 times as ankylosing spondylitis and 11 times as Angelman
+        syndrome. This abstract defines "ankylosing spondylitis (AS)" earlier, so preprocessing appends the
+        expansion to the query. Scores are raw ranking scores, comparable only within one query.
+      </figcaption>
+    </figure>
   </section>
 
-  <section id="where">
+  <section id="where" class="band">
     <h2>Where it helps</h2>
-    <p>TODO</p>
+    <p class="lead">Study how representations and label hierarchies affect entity linking.</p>
+    <p>
+      Biomedical concepts appear under different names, abbreviations and spelling variants. The same name
+      can also refer to different concepts, making context important.
+    </p>
+    <p>
+      XMR4EL gives researchers a configurable framework for studying these challenges: combining
+      representations, training label hierarchies and comparing ranking settings on annotated corpora.
+    </p>
+    <!-- Examples from src/data/home-examples.json (NCBI-disease gold annotations). Headings are working labels -->
+    <div class="cards">
+      <article>
+        <h3>One concept, many names</h3>
+        <p>{ex.same_concept.concept.name} <code>{ex.same_concept.concept.id}</code></p>
+        <ul class="forms">
+          {ex.same_concept.surface_forms.map((f) => <li><span>{f.text}</span><span class="num">{f.count}</span></li>)}
+        </ul>
+        <p class="src">Gold annotation counts, NCBI-disease {ex.same_concept.source.splits.join(' + ')}</p>
+      </article>
+      <article>
+        <h3>One name, many concepts</h3>
+        {ex.same_name.senses.map((s) => (
+          <figure>
+            <blockquote>{parts(s.context, ex.same_name.surface_form).map((t, i) => (i % 2 ? <mark>{t}</mark> : t))}</blockquote>
+            <figcaption>{s.name} <code>{s.id}</code></figcaption>
+          </figure>
+        ))}
+        <p class="src">NCBI-disease, PMIDs {ex.same_name.senses.map((s) => s.doc_id).join(', ')}</p>
+      </article>
+    </div>
   </section>
 
   <section id="how">
     <h2>How it works</h2>
-    <p>TODO</p>
+    <p class="lead">Represent the mention. Organise the labels. Search the hierarchy.</p>
+    <ol class="pipeline">
+      <li>
+        <h3>Read the data.</h3>
+        <p>Load annotated mentions and a configurable window of surrounding words.</p>
+      </li>
+      <li>
+        <h3>Encode the text.</h3>
+        <p>
+          The default representation combines SapBERT mention embeddings, character TF-IDF features and
+          context TF-IDF features.
+        </p>
+      </li>
+      <li>
+        <h3>Build the hierarchy.</h3>
+        <p>Aggregate training examples into label representations and cluster them into a tree.</p>
+      </li>
+      <li>
+        <h3>Train the rankers.</h3>
+        <p>Learn classifiers that route queries through the hierarchy and rank concepts within its leaves.</p>
+      </li>
+      <li>
+        <h3>Retrieve candidate concepts.</h3>
+        <p>
+          Search the tree with beam search and reweight candidates using mention similarity to training
+          examples. Reweighting is enabled in the supplied configuration.
+        </p>
+      </li>
+    </ol>
+    <svg class="tree" viewBox="0 0 360 140" role="img" aria-label="Illustration: beam search through the label tree, narrowing to one leaf">
+      {nodes.filter((n) => n.p !== undefined).map((n) => (
+        <line class={n.cls} x1={nodes[n.p].x} y1={nodes[n.p].y} x2={n.x} y2={n.y} />
+      ))}
+      {nodes.map((n) => n.leaf
+        ? <rect class={n.cls} x={n.x - 7} y={n.y - 7} width="14" height="14" />
+        : <circle class={n.cls} cx={n.x} cy={n.y} r="7" />)}
+    </svg>
+    <script is:inline>
+      const tree = document.querySelector('.tree');
+      const show = (s) => { for (let i = 1; i <= 4; i++) tree.classList.toggle('s' + i, i <= s); };
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) show(4);
+      else { let s = 0; setInterval(() => show((s = (s + 1) % 6)), 1100); }
+    </script>
+    <p class="tui-link"><a href="#demo" data-screen="6">See it in the TUI · Run Monitor</a></p>
   </section>
 
-  <section id="now">
+  <section id="now" class="band">
     <h2>What it accomplishes today</h2>
-    <p>TODO</p>
+    <p class="lead">A working workflow from training data to inspectable experiments.</p>
+    <!-- Card headings are working labels; final copy from the user -->
+    <div class="cards">
+      <article>
+        <h3>Train &amp; evaluate</h3>
+        <p>
+          Train and save models, rank candidate concepts and evaluate held-out datasets through command-line
+          scripts or the Python API.
+        </p>
+      </article>
+      <article>
+        <h3>Terminal UI</h3>
+        <p>
+          The optional terminal interface lets you configure experiment batches, browse saved trees, monitor
+          pipeline stages, resources and logs, and compare evaluations with checks on their compatibility.
+        </p>
+        <p class="tui-link"><a href="#demo" data-screen="3">See it in the TUI · Model Builder</a></p>
+      </article>
+      <article>
+        <h3>Reproducibility</h3>
+        <p>
+          Experiments launched through the experiment runner or terminal interface preserve configurations,
+          input hashes, code state, package versions and metrics to support reproducibility.
+        </p>
+      </article>
+    </div>
   </section>
 
   <section id="results">
     <h2>How well it does</h2>
-    <p>TODO</p>
+    <p class="lead">Encouraging results on ambiguous mentions, with overall accuracy varying by dataset.</p>
+    <p>
+      The 2 November 2026 benchmark evaluates NCBI-disease and BC5CDR-chemical against nearest-neighbour
+      retrieval and PECOS XR-Linear. Both datasets use the same model configuration.
+    </p>
+    <!-- Same numbers as the table below, which is the accessible view -->
+    <div class="chart" aria-hidden="true">
+      {Object.entries(acc).map(([name, vals]) => (
+        <div>
+          <p>{name}</p>
+          {systems.map((sys, i) => (
+            <div class:list={['row', { x: i === 0 }]}>
+              <span>{sys}</span>
+              <span class="bar" style={`--v: ${vals[i]}`}></span>
+              <span class="val">{vals[i]}%</span>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+    <div class="table-wrap" role="region" aria-labelledby="results-caption" tabindex="0">
+      <table>
+        <caption id="results-caption">Test Acc@1, validation run of 2 November 2026 (highest model score in bold)</caption>
+        <thead>
+          <tr>
+            <th scope="col">Test dataset</th>
+            <th scope="col" class="num">Kept / loaded rows</th>
+            <th scope="col" class="num">Vocabulary coverage</th>
+            <th scope="col" class="num">XMR4EL</th>
+            <th scope="col" class="num">SapBERT 1-NN</th>
+            <th scope="col" class="num">Character TF-IDF 1-NN</th>
+            <th scope="col" class="num">PECOS XR-Linear</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">NCBI-disease</th>
+            <td class="num">923 / 945</td>
+            <td class="num">97.7%</td>
+            <td class="num"><strong>89.5%</strong></td>
+            <td class="num">87.4%</td>
+            <td class="num">82.6%</td>
+            <td class="num">82.8%</td>
+          </tr>
+          <tr>
+            <th scope="row">BC5CDR-chemical</th>
+            <td class="num">5,167 / 5,352</td>
+            <td class="num">96.5%</td>
+            <td class="num">93.3%</td>
+            <td class="num">95.2%</td>
+            <td class="num"><strong>96.1%</strong></td>
+            <td class="num">81.2%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      On NCBI-disease, XMR4EL achieves higher accuracy than the three comparators. On BC5CDR-chemical, both
+      nearest-neighbour methods achieve higher accuracy. XMR4EL performs better than SapBERT 1-NN on
+      mention keys seen with multiple training labels in both datasets. These keys are lowercased and
+      stripped after abbreviation expansion.
+    </p>
+    <details>
+      <summary>How to read these numbers</summary>
+    <p>
+      Scores are test Acc@1 over loaded rows whose gold concept has training text. Vocabulary coverage
+      is kept / loaded rows; annotations skipped by the reader are outside this denominator.
+    </p>
+    <p>
+      The 1-NN baselines use the saved tree's training texts and labels, including CTD dictionary rows.
+      PECOS uses exported XMR4EL features. XMR4EL additionally applies nearest-neighbour reweighting and
+      returns 1,000 candidates per query in these runs, versus 100 for PECOS. These are recorded scores
+      from complete configured systems; the benchmark page explains the evidence limits.
+    </p>
+    <p>
+      These results come from one trained tree per dataset at commit <code>aeca7a4</code>. They are not
+      averages across repeated seeds and should not be compared directly with published leaderboard scores.
+      Establishing the hierarchy's independent contribution requires further controlled comparisons.
+    </p>
+    </details>
+    <p class="tui-link"><a href="#demo" data-screen="1">See it in the TUI · Results</a></p>
+    <p class="cta">
+      <a href={`${base}/benchmarks/`}>Explore the benchmark</a>
+      <span>
+        See the complete results, retrieval metrics, reweighting ablation, resource measurements and
+        reproduction instructions for this run.
+      </span>
+    </p>
   </section>
 
-  <section id="try">
+  <section id="try" class="band">
     <h2>Try it</h2>
-    <p>TODO</p>
+    <p class="lead">Run locally, from the terminal or Python.</p>
+    <p>
+      Clone the repository and install the locked dependencies with Python 3.12+ and uv. Add the optional
+      terminal interface to configure and inspect experiments interactively.
+    </p>
+    <div class="code">
+    <pre><code>git clone https://github.com/lasigeBioTM/XMR4EL.git
+cd XMR4EL
+uv sync --locked --extra tui
+.venv/bin/python -m xmr4el_tui</code></pre>
+      <button type="button" class="copy">Copy</button>
+    </div>
+    <script is:inline>
+      document.querySelector('.copy').addEventListener('click', async (e) => {
+        const b = e.currentTarget;
+        try {
+          await navigator.clipboard.writeText(b.previousElementSibling.textContent);
+          b.textContent = 'Copied';
+        } catch {
+          b.textContent = 'Copy failed';
+        }
+        setTimeout(() => (b.textContent = 'Copy'), 1500);
+      });
+    </script>
+    <p>
+      Datasets are downloaded separately. The repository includes preparation instructions, model
+      configurations and examples for training and evaluation.
+    </p>
+    <p>
+      Prepare a dataset, configure a model and launch your first experiment. Use the terminal interface to
+      follow its progress, inspect logs and explore completed evaluations.
+    </p>
+    <p>
+      See the <a href="https://github.com/lasigeBioTM/XMR4EL#readme">README</a> for installation details,
+      dataset preparation, command-line training and Python API examples.
+    </p>
   </section>
 
   <section id="cite">
     <h2>Who made it &amp; how to cite</h2>
-    <p>TODO</p>
+    <p class="lead">Open-source research software.</p>
+    <p>
+      XMR4EL was created by João Vedor and is hosted in the lasigeBioTM GitHub organisation. The code is
+      available under the MIT licence.
+    </p>
+    <p>
+      When using XMR4EL in research, reference the repository and the exact version or commit used, together
+      with your model configuration and dataset protocol.
+    </p>
+    <p>Explore the source, report an issue or contribute on GitHub.</p>
+    <ul>
+      <li><a href="https://github.com/lasigeBioTM/XMR4EL">Repository</a></li>
+      <li><a href="https://github.com/lasigeBioTM/XMR4EL/issues">Issues</a></li>
+      <li><a href="https://github.com/lasigeBioTM/XMR4EL/blob/main/LICENSE">Licence</a></li>
+    </ul>
   </section>
 </Base>
+
+<style>
+  /* Section rhythm: numbered mono eyebrow (the h2), lead as the headline, alternating full-bleed bands */
+  #demo { counter-reset: sec; margin-bottom: 0; }
+  section:not(#demo) { counter-increment: sec; margin-block: 0; padding-block: 3.5rem; }
+  section:not(#demo) > h2 {
+    font: 600 0.8rem var(--mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 0.75rem;
+  }
+  section:not(#demo) > h2::before { content: counter(sec, decimal-leading-zero) '\2002' / ''; color: var(--accent); }
+  section .lead { font-size: clamp(1.45rem, 3.2vw, 2rem); line-height: 1.2; max-width: 30ch; margin: 0 0 1.25rem; }
+  .band { background: var(--surface); box-shadow: 0 0 0 100vmax var(--surface); clip-path: inset(0 -100vmax); }
+  .band pre, .band article { background: var(--bg); }
+
+  /* How it works: left-to-right pipeline, wider than the text column */
+  .pipeline {
+    list-style: none; padding: 0; counter-reset: step;
+    display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1.75rem;
+    margin: 2rem calc(50% - min(42rem, 50cqi));
+  }
+  .pipeline li { position: relative; counter-increment: step; padding: 1rem; background: var(--surface); border: 1px solid var(--line); }
+  .pipeline li + li::before {
+    content: '→' / ''; position: absolute; left: -1.75rem; top: 0.9rem; width: 1.75rem; text-align: center; color: var(--accent); font-family: var(--mono);
+  }
+  .pipeline h3 { margin: 0 0 0.4rem; font: 600 0.95rem/1.35 var(--mono); }
+  .pipeline h3::before { content: counter(step) '\2002' / ''; color: var(--accent); }
+  .pipeline p { margin: 0; font-size: 0.92rem; line-height: 1.5; color: var(--muted); }
+  @media (max-width: 900px) {
+    .pipeline { grid-template-columns: 1fr; margin-inline: 0; }
+    .pipeline li + li::before { content: '↓' / ''; left: 1rem; top: -1.75rem; width: auto; line-height: 1.75rem; }
+  }
+
+  .tree { display: block; width: 100%; max-width: 22rem; margin: 0 auto 1rem; }
+  .tree * { transition: opacity 0.4s, stroke 0.4s, fill 0.4s; stroke-width: 1.5; }
+  .tree line { stroke: var(--line); }
+  .tree circle, .tree rect { fill: var(--bg); stroke: var(--muted); }
+  .tree.s1 .root, .tree.s2 .k1, .tree.s3 .k2 { stroke: var(--accent); }
+  .tree.s2 .x1, .tree.s3 .x2, .tree.s4 .k2:not(.win) { opacity: 0.25; }
+  .tree.s4 rect.win { fill: var(--accent); }
+
+  .tui-link { font: 0.9rem var(--mono); }
+  .tui-link a { text-decoration: none; }
+  .tui-link a::before { content: '▶\2002' / ''; font-size: 0.75em; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem; }
+  .cards article { padding: 1.25rem; border: 1px solid var(--line); }
+  .cards h3 { margin: 0 0 0.5rem; font: 600 1rem var(--mono); }
+  .cards p { margin: 0; font-size: 0.95rem; }
+  .cards .tui-link { margin-top: 0.75rem; }
+  #where .cards { margin-top: 1.5rem; }
+  .cards code { font-size: 0.8rem; color: var(--muted); }
+  .forms { list-style: none; padding: 0; margin: 0.75rem 0; }
+  .forms li { display: flex; justify-content: space-between; padding: 0.3rem 0; border-bottom: 1px solid var(--line); font: 0.9rem var(--mono); }
+  .cards figure { margin: 0.75rem 0; }
+  .cards blockquote { margin: 0; font-size: 0.95rem; }
+  .cards figcaption { font-size: 0.85rem; margin-top: 0.25rem; }
+  .src { font-size: 0.8rem !important; color: var(--muted); margin-top: 0.75rem !important; }
+
+  /* Worked example: sentence, query the model saw, ranked candidates */
+  mark { background: none; color: var(--accent); font-weight: 600; border-bottom: 2px solid var(--accent); }
+  .example { margin: 1.5rem 0 0; padding: 1.25rem; background: var(--surface); border: 1px solid var(--line); }
+  .example blockquote { margin: 0 0 0.5rem; font-size: 1.1rem; }
+  .query { margin: 0; font: 0.82rem/1.5 var(--mono); color: var(--muted); overflow-wrap: anywhere; }
+  .query span { color: var(--text); font-weight: 600; margin-right: 0.4rem; }
+  .example ol { list-style: none; padding: 0; margin: 1rem 0; border-top: 1px solid var(--line); }
+  .example li { display: grid; grid-template-columns: 1.5rem minmax(0, 1fr) auto; gap: 0.75rem; padding: 0.4rem 0; border-bottom: 1px solid var(--line); font-size: 0.92rem; }
+  .example li code { font-size: 0.8rem; color: var(--muted); margin-left: 0.25rem; }
+  .example .rank { font-family: var(--mono); color: var(--muted); }
+  .example .gold { font-weight: 600; }
+  .example .gold .rank { color: var(--accent); }
+  .example small { margin-left: 0.5rem; font: 600 0.7rem var(--mono); text-transform: uppercase; color: var(--accent); }
+  .example figcaption { font-size: 0.85rem; color: var(--muted); }
+
+  /* Results: horizontal bars, 0–100%, XMR4EL in the accent, others gray */
+  .chart { display: grid; gap: 1.25rem; margin: 1.5rem 0; }
+  .chart p { margin: 0 0 0.4rem; font: 600 0.85rem var(--mono); }
+  .chart .row { display: grid; grid-template-columns: 11.5rem minmax(0, 1fr) 3.5rem; align-items: center; gap: 0.75rem; font-size: 0.9rem; margin-bottom: 2px; }
+  .chart .bar { height: 0.85rem; width: calc(var(--v) * 1%); background: var(--bar); border-radius: 0 4px 4px 0; }
+  .chart .x { font-weight: 600; }
+  .chart .x .bar { background: var(--accent); }
+  .chart .val { text-align: right; font-variant-numeric: tabular-nums; }
+  @media (max-width: 520px) {
+    .chart .row { grid-template-columns: 8.5rem minmax(0, 1fr) 3rem; font-size: 0.82rem; gap: 0.5rem; }
+  }
+  details { margin: 1rem 0; }
+  summary { cursor: pointer; font-weight: 600; }
+
+  .code { position: relative; }
+  .code pre { padding-right: 5.5rem; }
+  .copy {
+    position: absolute; top: 0.6rem; right: 0.6rem; font: 0.8rem var(--mono); color: var(--text);
+    background: var(--surface); border: 1px solid var(--line); padding: 0.15rem 0.55rem; cursor: pointer;
+  }
+  .copy:hover { border-color: var(--accent); }
+</style>

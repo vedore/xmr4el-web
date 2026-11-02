@@ -1,0 +1,458 @@
+---
+import Base from '../layouts/Base.astro';
+
+// Source: XMR4EL BENCHMARK.md, recorded validation of 2026-11-02.
+const metricCols = ['Acc@1', 'Acc@1_all', 'MRR', 'R@10', 'Seen 1', 'Seen >1', 'Unseen', 'Hybrid'];
+
+// best: this row has the highest Acc@1 in its group
+const nnGroups = [
+  { set: 'NCBI-disease', split: 'dev', n: '537 / 17 / 175', rows: [
+    { sys: 'XMR4EL', best: true, v: ['0.926', '0.892', '0.947', '0.974', '0.968', '0.941', '0.794', '0.930'] },
+    { sys: 'SapBERT 1-NN', v: ['0.894', '0.861', '0.932', '0.984', '0.972', '0.176', '0.726', '0.914'] },
+    { sys: 'Character TF-IDF 1-NN', v: ['0.868', '0.836', '0.911', '0.973', '0.972', '0.176', '0.617', '0.888'] },
+  ] },
+  { set: 'NCBI-disease', split: 'test', n: '633 / 33 / 257', rows: [
+    { sys: 'XMR4EL', best: true, v: ['0.895', '0.874', '0.922', '0.964', '0.978', '0.818', '0.700', '0.898'] },
+    { sys: 'SapBERT 1-NN', v: ['0.874', '0.854', '0.910', '0.966', '0.976', '0.394', '0.685', '0.894'] },
+    { sys: 'Character TF-IDF 1-NN', v: ['0.826', '0.806', '0.874', '0.946', '0.976', '0.394', '0.510', '0.845'] },
+  ] },
+  { set: 'BC5CDR-chemical', split: 'dev', n: '4465 / 68 / 648', rows: [
+    { sys: 'XMR4EL', v: ['0.946', '0.923', '0.954', '0.966', '0.977', '0.794', '0.744', '0.964'] },
+    { sys: 'SapBERT 1-NN', best: true, v: ['0.968', '0.945', '0.975', '0.986', '0.996', '0.559', '0.821', '0.974'] },
+    { sys: 'Character TF-IDF 1-NN', v: ['0.961', '0.939', '0.970', '0.983', '0.996', '0.559', '0.765', '0.967'] },
+  ] },
+  { set: 'BC5CDR-chemical', split: 'test', n: '4330 / 111 / 726', rows: [
+    { sys: 'XMR4EL', v: ['0.933', '0.901', '0.943', '0.960', '0.963', '0.811', '0.774', '0.957'] },
+    { sys: 'SapBERT 1-NN', v: ['0.952', '0.919', '0.963', '0.983', '0.989', '0.649', '0.774', '0.957'] },
+    { sys: 'Character TF-IDF 1-NN', best: true, v: ['0.961', '0.928', '0.969', '0.983', '0.989', '0.649', '0.837', '0.966'] },
+  ] },
+];
+
+// PECOS Acc@1_all is derived (Acc@1 × kept / total), marked *
+const pecosGroups = [
+  { set: 'NCBI-disease', split: 'dev', rows: [
+    { sys: 'XMR4EL', best: true, v: ['0.926', '0.892', '0.947', '0.974', '0.968', '0.941', '0.794', '0.930'] },
+    { sys: 'PECOS XR-Linear', v: ['0.894', '0.861*', '0.916', '0.947', '0.946', '0.882', '0.737', '0.916'] },
+  ] },
+  { set: 'NCBI-disease', split: 'test', rows: [
+    { sys: 'XMR4EL', best: true, v: ['0.895', '0.874', '0.922', '0.964', '0.978', '0.818', '0.700', '0.898'] },
+    { sys: 'PECOS XR-Linear', v: ['0.828', '0.808*', '0.875', '0.939', '0.913', '0.879', '0.611', '0.873'] },
+  ] },
+  { set: 'BC5CDR-chemical', split: 'dev', rows: [
+    { sys: 'XMR4EL', best: true, v: ['0.946', '0.923', '0.954', '0.966', '0.977', '0.794', '0.744', '0.964'] },
+    { sys: 'PECOS XR-Linear', v: ['0.826', '0.806*', '0.860', '0.910', '0.853', '0.574', '0.665', '0.954'] },
+  ] },
+  { set: 'BC5CDR-chemical', split: 'test', rows: [
+    { sys: 'XMR4EL', best: true, v: ['0.933', '0.901', '0.943', '0.960', '0.963', '0.811', '0.774', '0.957'] },
+    { sys: 'PECOS XR-Linear', v: ['0.812', '0.784*', '0.846', '0.895', '0.849', '0.441', '0.650', '0.939'] },
+  ] },
+];
+---
+<Base title="Benchmarks · XMR4EL">
+  <h1>Benchmark — 2 November 2026</h1>
+  <p class="lead">
+    Recorded results on NCBI-disease and BC5CDR-chemical, compared with nearest-neighbour retrieval
+    and PECOS XR-Linear.
+  </p>
+  <p>
+    XMR4EL is a configurable research framework for biomedical entity linking. Compared with SapBERT
+    1-NN, it has higher accuracy on ambiguous mention keys — those seen in training with multiple
+    labels — in both datasets. Overall accuracy is higher on NCBI-disease and lower on BC5CDR-chemical.
+    These results support further study of ambiguous mentions; the benchmark covers one trained tree
+    per dataset.
+  </p>
+  <p class="muted">
+    Source: <a href="https://github.com/lasigeBioTM/XMR4EL/blob/main/BENCHMARK.md">XMR4EL benchmark report</a>.
+    Recorded source commit: <code>aeca7a4</code>.
+  </p>
+
+  <nav aria-label="On this page">
+    <ol>
+      <li><a href="#metrics">Task and metrics</a></li>
+      <li><a href="#protocol">Systems and evaluation protocol</a></li>
+      <li><a href="#current">Current validation — 2 November 2026</a></li>
+      <li><a href="#ablation">Nearest-neighbour reweighting ablation</a></li>
+      <li><a href="#cost">Computational cost</a></li>
+      <li><a href="#limits">Evidence and limitations</a></li>
+      <li><a href="#reproduce">Reproduction</a></li>
+    </ol>
+  </nav>
+
+  <section id="metrics">
+    <h2>1. Task and metrics</h2>
+    <p>
+      The loader produces one gold concept identifier per retained row. This benchmark ranks concepts
+      that have training text, supplied by annotated training mentions or dictionary names.
+    </p>
+    <p>
+      Total means rows loaded by the PubTator reader before filtering to the training vocabulary.
+      Annotations already skipped by the reader are outside this denominator. Metrics follow XMR4EL
+      evaluation protocol <strong>1</strong>.
+    </p>
+    <dl>
+      <dt>Acc@1</dt>
+      <dd>
+        The fraction of in-vocabulary rows whose first prediction equals the gold identifier.
+        Gold concepts without training text are excluded. Kept / loaded counts appear in the
+        dataset-size table.
+      </dd>
+      <dt>Acc@1_all (“cov × acc” in the report)</dt>
+      <dd>Correct first predictions / all loaded rows, counting out-of-vocabulary gold concepts as misses.</dd>
+      <dt>Vocabulary coverage</dt>
+      <dd>The proportion of loaded rows that are in vocabulary (kept / loaded).</dd>
+      <dt>MRR</dt>
+      <dd>Mean reciprocal rank of the gold concept over in-vocabulary rows; missing gold contributes zero.</dd>
+      <dt>Recall@10 (R@10)</dt>
+      <dd>The fraction of in-vocabulary rows with the gold concept in the first ten predictions.</dd>
+      <dt>Candidate recall (R@cand)</dt>
+      <dd>The fraction of in-vocabulary rows with the gold concept anywhere in the returned candidate scores.</dd>
+      <dt>Mention-string groups</dt>
+      <dd>
+        Acc@1 per in-vocabulary group. Keys use text before <code>[SEP]</code>, stripped and lowercased
+        after the configured abbreviation expansion. <em>Seen 1</em>: the key occurs in training with one
+        distinct label. <em>Seen &gt;1</em>: it occurs with several labels. <em>Unseen</em>: it does not
+        occur in training.
+      </dd>
+      <dt>Hybrid (diagnostic)</dt>
+      <dd>
+        A seen mention key maps to its majority training label; otherwise the system's first prediction
+        is used. The denominator is in-vocabulary rows.
+      </dd>
+    </dl>
+    <p>
+      These scores are not comparable with published numbers that score all mentions against a full
+      ontology.
+    </p>
+  </section>
+
+  <section id="protocol">
+    <h2>2. Systems and evaluation protocol</h2>
+    <h3>XMR4EL</h3>
+    <p>
+      Both recorded trees use <code>configs/xmr4el_bc5cdr_config.json</code>.
+    </p>
+    <ul>
+      <li>
+        <strong>Representations:</strong> SapBERT (<code>cambridgeltl/SapBERT-from-PubMedBERT-fulltext</code>,
+        CLS) + character 2–4-gram TF-IDF (SVD 768) + word-unigram context TF-IDF (10-token window,
+        SVD 768), 2,304 dimensions. Blocks are normalized before concatenation. Abbreviation expansion
+        uses <code>append</code>.
+      </li>
+      <li>
+        <strong>Hierarchy:</strong> PIFA label embeddings, balanced k-means with 128 clusters, depth 2,
+        joint logistic-regression matchers with balanced class weights.
+      </li>
+      <li>
+        <strong>Search:</strong> beam 10, 100 candidates per visited leaf, no final top-k cap. Leaf
+        matcher probabilities are multiplied by ancestor routing-path probabilities, then reweighted
+        using mention similarity with beta 10. The recorded runs return 1,000 candidates per query.
+      </li>
+    </ul>
+    <h3>Baselines and references</h3>
+    <ul>
+      <li>
+        <strong>SapBERT 1-NN:</strong> each label is scored by maximum cosine similarity to its training
+        mention embeddings (<code>scripts/baselines/nn_baselines.py</code>). It uses the saved tree's
+        training rows, vocabulary and transformer configuration; exact ties go to the lower label index.
+      </li>
+      <li>
+        <strong>Character TF-IDF 1-NN:</strong> the same label scoring using unreduced character TF-IDF
+        fitted on training mentions. This string-similarity reference does not use the tree's SVD or
+        context blocks.
+      </li>
+      <li>
+        <strong>PECOS XR-Linear:</strong> libpecos 1.2.8 trained on XMR4EL's exported features and aligned
+        labels (<code>scripts/baselines/pecos_compare.py</code>), <code>-nr_splits 16 -max_leaf_size 100
+        -threshold 0</code>, beam 10, top 100. PECOS is trained once on the training rows (the tree’s train
+        split + dictionary rows) packaged in the dev export; dev and test mentions are only predicted, the
+        test set with that same model. It has no nearest-neighbour reweighting. This compares complete
+        configured systems on shared features — XR-Linear against XMR4EL’s tree, leaf matcher and
+        reweighting. Its hierarchy, loss, scoring and candidate budget differ from XMR4EL's.
+      </li>
+    </ul>
+    <h3>Training resources</h3>
+    <p>
+      Both training files are <code>train_plus_ctd.pubtator</code>: the train split plus CTD MEDIC/OMIM
+      for NCBI-disease, and the train split plus CTD chemicals for BC5CDR-chemical. Dictionary assembly
+      and corpus contents were not independently audited.
+    </p>
+    <p>
+      Ties follow each system's implemented ordering; identical tie handling across systems is not
+      guaranteed. Shared features do not isolate the ranking algorithm or reproduce published PECOS
+      pipelines.
+    </p>
+  </section>
+
+  <section id="current">
+    <h2>3. Current validation — 2 November 2026</h2>
+    <p>
+      Recorded with <code>scripts/run_validation.sh</code> at commit <code>aeca7a4</code>, on one Linux
+      server with a Tesla T4 GPU. Containers used CPU cores 0–15, 16 threads and a Docker memory limit
+      of <code>40g</code>, with no swap. Both trees were trained in this run; all six tracked records
+      report clean code and completed status.
+    </p>
+
+    <div class="table-wrap" role="region" aria-labelledby="cap-sizes" tabindex="0">
+      <table>
+        <caption id="cap-sizes">Dataset sizes and vocabulary coverage</caption>
+        <thead>
+          <tr>
+            <th scope="col">Dataset</th>
+            <th scope="col" class="num">Training labels / rows</th>
+            <th scope="col" class="num">Dev rows (kept / loaded)</th>
+            <th scope="col" class="num">Dev coverage (derived)</th>
+            <th scope="col" class="num">Test rows (kept / loaded)</th>
+            <th scope="col" class="num">Test coverage (derived)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">NCBI-disease</th>
+            <td class="num">13,385 / 95,831</td><td class="num">729 / 757</td><td class="num">96.3%</td>
+            <td class="num">923 / 945</td><td class="num">97.7%</td>
+          </tr>
+          <tr>
+            <th scope="row">BC5CDR-chemical</th>
+            <td class="num">179,709 / 474,854</td><td class="num">5,181 / 5,307</td><td class="num">97.6%</td>
+            <td class="num">5,167 / 5,352</td><td class="num">96.5%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>XMR4EL versus SapBERT 1-NN and character TF-IDF 1-NN</h3>
+    <div class="table-wrap" role="region" aria-labelledby="cap-nn" tabindex="0">
+      <table>
+        <caption id="cap-nn">
+          All metrics, current validation. <i>n</i> = mentions per group (seen 1 / seen &gt;1 / unseen).
+          Highest Acc@1 per split in bold.
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Dataset, split</th>
+            <th scope="col">System</th>
+            {metricCols.map((c) => <th scope="col" class="num">{c}</th>)}
+          </tr>
+        </thead>
+        {nnGroups.map((g) => (
+          <tbody>
+            {g.rows.map((r, i) => (
+            <tr>
+              {i === 0 && (
+                <th scope="rowgroup" rowspan={g.rows.length}>
+                  {g.set} {g.split}<br /><span class="muted">n {g.n}</span>
+                </th>
+              )}
+              <th scope="row">{r.sys}</th>
+              {r.v.map((x, j) => <td class="num">{j === 0 && r.best ? <strong>{x}</strong> : x}</td>)}
+            </tr>
+            ))}
+          </tbody>
+        ))}
+      </table>
+    </div>
+    <p>
+      XMR4EL has higher Acc@1 than SapBERT 1-NN on NCBI-disease and lower Acc@1 on BC5CDR-chemical.
+      It has higher accuracy on mention keys seen with multiple training labels in both datasets.
+      Candidate recall is 0.9863 / 0.9870 on NCBI-disease dev / test and 0.9718 / 0.9659 on
+      BC5CDR-chemical. Gold labels outside the candidate pool cannot be recovered by reordering it.
+    </p>
+
+    <h3>XMR4EL versus PECOS XR-Linear (same exported features)</h3>
+    <div class="table-wrap" role="region" aria-labelledby="cap-pecos" tabindex="0">
+      <table>
+        <caption id="cap-pecos">All metrics, current validation. Higher Acc@1 per split in bold.</caption>
+        <thead>
+          <tr>
+            <th scope="col">Dataset, split</th>
+            <th scope="col">System</th>
+            {metricCols.map((c) => <th scope="col" class="num">{c}</th>)}
+          </tr>
+        </thead>
+        {pecosGroups.map((g) => (
+          <tbody>
+            {g.rows.map((r, i) => (
+            <tr>
+              {i === 0 && <th scope="rowgroup" rowspan={g.rows.length}>{g.set} {g.split}</th>}
+              <th scope="row">{r.sys}</th>
+              {r.v.map((x, j) => <td class="num">{j === 0 && r.best ? <strong>{x}</strong> : x}</td>)}
+            </tr>
+            ))}
+          </tbody>
+        ))}
+      </table>
+    </div>
+    <p class="muted">
+      * Derived (Acc@1 × kept / total, from PECOS’s 4-decimal Acc@1). PECOS R@10 is computed over its top
+      100 predictions. MRR is also restricted to each system's returned predictions: 100 for PECOS,
+      1,000 for XMR4EL in these runs. The 1-NN baselines rank the full training vocabulary.
+    </p>
+  </section>
+
+  <section id="ablation">
+    <h2>4. Nearest-neighbour reweighting ablation</h2>
+    <p>
+      The script fixes an evaluation-only ablation on the same trees, turning off reweighting
+      (beta 10 → 0). Recorded evaluation protocols, population and mention-group hashes, other search
+      settings and candidate recall match the beta-10 evaluations. Net correct-count losses use
+      full-precision accuracies and kept-row counts.
+    </p>
+    <div class="table-wrap" role="region" aria-labelledby="cap-abl" tabindex="0">
+      <table>
+        <caption id="cap-abl">Acc@1 with beta 10 → beta 0</caption>
+        <thead>
+          <tr>
+            <th scope="col">Dataset</th>
+            <th scope="col" class="num">Dev</th>
+            <th scope="col" class="num">Test</th>
+            <th scope="col" class="num">Net correct rows lost, dev / test (derived)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">NCBI-disease</th>
+            <td class="num">0.926 → 0.892</td><td class="num">0.895 → 0.771</td><td class="num">25 / 114</td>
+          </tr>
+          <tr>
+            <th scope="row">BC5CDR-chemical</th>
+            <td class="num">0.946 → 0.603</td><td class="num">0.933 → 0.631</td><td class="num">1,776 / 1,559</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      Candidate recall is unchanged. On BC5CDR-chemical dev, seen-1 accuracy drops from 0.977 to 0.636:
+      36.4% of those rows are misranked without reweighting. The beta-zero scores still combine leaf
+      matcher probabilities with ancestor routing-path probabilities.
+    </p>
+  </section>
+
+  <section id="cost">
+    <h2>5. Computational cost</h2>
+    <p>
+      Measurements from this validation on the same server, using CUDA. Peak resident process memory
+      (RSS) is reported in millions of KiB, matching the recorded scale.
+    </p>
+    <div class="table-wrap" role="region" aria-labelledby="cap-cost" tabindex="0">
+      <table>
+        <caption id="cap-cost">Training time, batch prediction time per kept row and peak process RSS</caption>
+        <thead>
+          <tr>
+            <th scope="col">Measurement</th>
+            <th scope="col" class="num">NCBI-disease</th>
+            <th scope="col" class="num">BC5CDR-chemical</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">XMR4EL train (encode / hierarchy / total)</th>
+            <td class="num">72.5 s / 39.4 s / 116.0 s</td><td class="num">441.4 s / 725.8 s / 1,261.0 s</td>
+          </tr>
+          <tr>
+            <th scope="row">XMR4EL train + dev peak RSS (millions of KiB)</th>
+            <td class="num">5.1</td><td class="num">21.8</td>
+          </tr>
+          <tr>
+            <th scope="row">XMR4EL test batch prediction (ms / kept row)</th>
+            <td class="num">2.77</td><td class="num">3.97</td>
+          </tr>
+          <tr>
+            <th scope="row">1-NN command, both baselines, peak RSS (millions of KiB)</th>
+            <td class="num">3.2</td><td class="num">15.1</td>
+          </tr>
+          <tr>
+            <th scope="row">PECOS train time / train + dev peak RSS (s / millions of KiB)</th>
+            <td class="num">32.3 / 3.6</td><td class="num">282.2 / 27.0</td>
+          </tr>
+          <tr>
+            <th scope="row">Feature export for PECOS, peak RSS (millions of KiB)</th>
+            <td class="num">6.6</td><td class="num">31.0</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      XMR4EL training and test prediction logs show SapBERT embedding-cache hits; these times exclude
+      computing those embeddings from scratch. Test time is total batch prediction, including encoding
+      and reweighting, divided by kept rows. Model loading and metric computation are excluded.
+    </p>
+    <p>
+      XMR4EL runner totals include loading and saving. PECOS training excludes feature fitting/export
+      and model saving. Memory is the child command's process high-water RSS, rounded to one decimal;
+      it is not whole-container RAM or GPU memory. The recorded memory scale is neither GB nor GiB.
+      The 1-NN logs do not record embedding-cache state. These are single-run measurements.
+    </p>
+  </section>
+
+  <section id="limits">
+    <h2>6. Evidence and limitations</h2>
+    <p>
+      The recorded metrics and logs were checked in the local validation bundle, including clean-code
+      records, configuration bytes, recorded input hashes, label counts and loaded row counts. The bundle
+      contains run metadata, metric JSONs, baseline reports and PECOS score logs; these numerical artifacts
+      are not included in a source checkout.
+    </p>
+    <p>
+      Input hashes were cross-checked as recorded metadata. Corpus contents, dictionary assembly, split
+      independence and possible dictionary leakage were not independently audited. The bundle omits the
+      saved trees, corpora, fitted transformer revision metadata, exported feature matrices, PECOS models
+      and prediction matrices, so individual predictions and export alignment cannot be recomputed from it.
+    </p>
+    <p>
+      Baseline reports and PECOS logs match vocabulary, row and mention-group counts and follow the
+      source-defined filtering/export contract. They lack the protocol, population and mention-group hashes
+      required by the terminal interface's strict comparison checks. Matching counts alone do not prove
+      identical evaluated rows; the tables describe the recorded outputs.
+    </p>
+    <p>
+      Both datasets used the same configuration. The project reports that neither was used for tuning;
+      the saved records verify the common configuration, not that tuning history. The test files had
+      been evaluated before this validation.
+    </p>
+    <p>
+      There is one trained tree per dataset, with one regular test evaluation and the fixed beta-zero
+      ablation. No repeated-seed estimate or statistical-significance test is reported. The ambiguous
+      mention-key groups contain only 17–111 in-vocabulary rows per split.
+    </p>
+    <p>
+      Shared features do not make the systems' hierarchies, losses, score fusion or candidate budgets
+      equivalent. The tables compare configured systems. Candidate recall can lose gold labels through
+      routing or the per-leaf candidate limit; the reported scores do not isolate either cause.
+      The reweighting ablation measures the effect of that step; establishing the hierarchy's independent
+      contribution requires a separate controlled comparison.
+    </p>
+  </section>
+
+  <section id="reproduce">
+    <h2>7. Reproduction</h2>
+    <p>From the XMR4EL repository root, with the prerequisites below:</p>
+    <pre><code>mkdir -p outputs
+nohup bash scripts/run_validation.sh &gt; outputs/validation_run.log 2&gt;&amp;1 &amp;</code></pre>
+    <h3>Prerequisites</h3>
+    <ul>
+      <li>Linux, Docker with CUDA GPU access, and access to the SapBERT checkpoint or an existing cache.</li>
+      <li>
+        Local datasets <code>datasets/ncbi_disease</code> and <code>datasets/BC5CDR/chemical</code>, each
+        containing <code>train_plus_ctd.pubtator</code>, <code>dev.pubtator</code> and <code>test.pubtator</code>
+        matching the script's pinned hashes.
+      </li>
+      <li>A clean tracked checkout and the model configuration matching the script's pinned hash.</li>
+    </ul>
+    <p>
+      The script builds the <code>xmr4el</code> and <code>xmr4el-pecos</code> Docker images and refuses
+      existing <code>outputs/validation/</code> or <code>outputs/pecos/validation/</code> directories.
+      Environment variables at its top control CPU allocation, thread count, RAM, scheduling and GPUs.
+    </p>
+    <h3>Outputs</h3>
+    <ul>
+      <li><code>outputs/validation/</code>: logs, environment, baseline reports and run specifications.</li>
+      <li><code>outputs/runs/&lt;timestamp&gt;_val_&lt;set&gt;[_test|_knn0]</code>: tracked run records and metrics.</li>
+      <li>Saved XMR4EL trees and PECOS exports, models and predictions.</li>
+      <li><code>outputs/validation.tar.gz</code>: run records and logs, excluding trees and PECOS exports/models/predictions.</li>
+    </ul>
+    <p>
+      The recorded source commit is <code>aeca7a4</code>. Some Docker dependencies and the embedding-cache
+      state are not pinned, so a new build and run may produce different timings or predictions.
+    </p>
+  </section>
+</Base>

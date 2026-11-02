@@ -1,0 +1,52 @@
+{
+  "worked_example": {
+    "sentence": "HLA-B27 accounts for a minority of the overall genetic susceptibility to AS.",
+    "mention": "AS",
+    "query": "AS ankylosing spondylitis [SEP] accounts for a minority of the overall genetic susceptibility to .",
+    "gold": {"id": "MESH:D013167", "name": "Spondylitis, Ankylosing"},
+    "candidates": [
+      {"rank": 1, "id": "MESH:D013167", "name": "Spondylitis, Ankylosing", "score": 19282.4899},
+      {"rank": 2, "id": "MESH:D000089183", "name": "Axial Spondyloarthritis", "score": 1261.7262},
+      {"rank": 3, "id": "MESH:D000089202", "name": "Non-Radiographic Axial Spondyloarthritis", "score": 899.9748},
+      {"rank": 4, "id": "MESH:D025242", "name": "Spondylarthropathies", "score": 881.3102},
+      {"rank": 5, "id": "MESH:D055009", "name": "Spondylosis", "score": 294.5534}
+    ],
+    "source": {
+      "dataset": "NCBI-disease (datasets/ncbi_disease/test.pubtator)",
+      "split": "test",
+      "doc_id": "9336417",
+      "tree": "outputs/saved_trees/xmodel_2026-11-02_11-56-46 (tree_id 00a0bffe87d4446e855251204f83e4cb; trained on datasets/ncbi_disease/train_plus_ctd.pubtator, 13385 labels, sapbert_char_context; predict_config beam_size 10, topk 0, knn_beta 10.0, leaf_candidates 100)",
+      "commit": "3789974e12a6f34b8f284f895579476bccb42149",
+      "command": "python -c \"import numpy as np; from xmr4el.xmodel import XModel; from xmr4el.data.readers import Preprocessor; xm = XModel.load('outputs/saved_trees/xmodel_2026-11-02_11-56-46'); t = Preprocessor.load_pubtator_file('datasets/ncbi_disease/test.pubtator', window=xm.context_window, abbrev=xm.abbrev_expansion); i = next(i for i, (d, s) in enumerate(zip(t['docs'], t['spans'])) if d == '9336417' and tuple(s) == (1693, 1695)); r = xm.predict([t['corpus'][i]], **xm.resolve_predict_config()).getrow(0); print([(xm.initial_labels[r.indices[j]], round(float(r.data[j]), 4)) for j in np.argsort(-r.data, kind='stable')[:5]])\""
+    }
+  },
+  "same_concept": {
+    "concept": {"id": "MESH:D017827", "name": "Machado-Joseph Disease"},
+    "surface_forms": [
+      {"text": "MJD", "count": 26},
+      {"text": "Machado-Joseph disease", "count": 13},
+      {"text": "SCA3", "count": 10},
+      {"text": "spinocerebellar ataxia type 3", "count": 1}
+    ],
+    "source": {
+      "dataset": "NCBI-disease (datasets/ncbi_disease/{train,dev,test}.pubtator)",
+      "splits": ["train", "dev", "test"],
+      "commit": "3789974e12a6f34b8f284f895579476bccb42149",
+      "command": "for f in train dev test; do awk -F'\\t' -v s=$f 'NF>=6 && $6==\"D017827\" {print s\"\\t\"$4}' datasets/ncbi_disease/$f.pubtator; done | sort | uniq -c | sort -rn"
+    }
+  },
+  "same_name": {
+    "surface_form": "FAP",
+    "senses": [
+      {"id": "MESH:D011125", "name": "Adenomatous Polyposis Coli", "context": "Familial adenomatous polyposis (FAP) is a dominantly inherited condition predisposing to colorectal cancer.", "doc_id": "1324223"},
+      {"id": "MESH:D028227", "name": "Amyloid Neuropathies, Familial", "context": "Chronic nonspherocytic hemolytic anemia (CNSHA) and glucose 6 phosphate dehydrogenase (G6PD) deficiency in a patient with familial amyloidotic polyneuropathy (FAP).", "doc_id": "2912886"}
+    ],
+    "source": {
+      "dataset": "NCBI-disease (datasets/ncbi_disease/{train,dev,test}.pubtator)",
+      "splits": ["train", "dev", "test"],
+      "commit": "3789974e12a6f34b8f284f895579476bccb42149",
+      "command": "for f in train dev test; do awk -F'\\t' 'NF>=6 && $4==\"FAP\" {print FILENAME\"\\t\"$1\"\\t\"$6}' datasets/ncbi_disease/$f.pubtator; done | sort | uniq -c   # contexts: the sentence containing the annotated span in the title+abstract of PMIDs 1324223 and 2912886 (datasets/ncbi_disease/train.pubtator)"
+    }
+  },
+  "notes": "No null fields. IDs: the NCBI-disease PubTator files store bare MeSH IDs (e.g. D013167); the MESH: prefix is added to match the name source, datasets/CTD/CTD_diseases.tsv.gz (CTD MEDIC vocabulary, 'Report created: Tue Sep 29 13:07:12 EDT 2026'), where every name above was looked up by DiseaseID. Worked example: in the training split the exact string 'AS' is gold-labelled 10x Spondylitis, Ankylosing (D013167) and 11x Angelman Syndrome (D017204), so the string alone is ambiguous. The tree's preprocessing (abbrev_expansion='append', context_window=10) turns the mention into the query 'AS ankylosing spondylitis [SEP] accounts for a minority of the overall genetic susceptibility to .' because the abstract defines 'ankylosing spondylitis (AS)' earlier; the disambiguation therefore comes largely from in-document abbreviation expansion, not from the sentence alone. All 10 test 'AS' mentions (5 per sense, PMIDs 9336417 and 9585605) are ranked correctly at top-1 by this tree. Scores are the tree's raw candidate scores (leaf matcher score x routing-path probability x exp(knn_beta * max cosine) with knn_beta=10), not probabilities; they are only comparable within one query. The recorded scores come from the single-query command above; a batched prediction over the whole test split gave the same top-5 order with scores differing in the 4th-5th significant digit (e.g. 19282.4669 vs 19282.4899), presumably from batched float32 encoding. The tree was trained at commit b7b51ef13bc3fc26a91ee0f443f6a0a9f2a6757c (dirty: TUI/docs/test files only); between that commit and the HEAD used here (3789974) the xmr4el/ package changed only in comment/doc lines. Test-split inference was run once over the in-vocabulary rows (923 of 945) to choose the example; it is not a recorded evaluation. same_concept counts are exact, case-sensitive mention-text counts over gold annotations: MJD 25 train + 1 test, Machado-Joseph disease 12 + 1, SCA3 6 + 4, spinocerebellar ataxia type 3 1 train; dev has none. D017827 also has 'Spinocerebellar ataxia type-3', 'spinocerebellar ataxia 3' and 'spinocerebellar ataxia 3/Machado-Joseph disease' (1 each, train), not listed. same_name: 'FAP' is gold-labelled D011125 52x (train, dev and test) and D028227 2x (both in train PMID 2912886); the D028227 context is that document's title. A stronger-balanced alternative is 'AS' (D013167 15x, D017204 16x), not used here to avoid repeating the worked example's surface form. BC5CDR was not used."
+}

@@ -27,8 +27,9 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
       <div class="showcase">
         <p class="eyebrow">Terminal UI</p>
         <!-- Placeholder descriptions, paraphrased from the XMR4EL README. Buttons seek the recording. -->
+        <button type="button" class="step" data-step="-1" aria-label="Previous screen">←</button>
         <ol class="screens">
-          <li><button type="button"><b>Dashboard</b><small>Saved trees by dataset, their evaluations and runs; active runs.</small></button></li>
+          <li><button type="button" aria-current="true"><b>Dashboard</b><small>Saved trees by dataset, their evaluations and runs; active runs.</small></button></li>
           <li><button type="button"><b>Results</b><small>Compare a baseline with challenger trees.</small></button></li>
           <li><button type="button"><b>Dataset Setup</b><small>Pick a dataset.</small></button></li>
           <li><button type="button"><b>Model Builder</b><small>Build one or more model configs.</small></button></li>
@@ -36,6 +37,7 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
           <li><button type="button"><b>Batch Monitor</b><small>Execution queue, the selected tree's live log, Stop Batch.</small></button></li>
           <li><button type="button"><b>Run Monitor</b><small>Pipeline stages, resources, live logs.</small></button></li>
         </ol>
+        <button type="button" class="step" data-step="1" aria-label="Next screen">→</button>
       </div>
     </div>
     <script is:inline define:vars={{ base }}>
@@ -69,6 +71,19 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
         v.currentTime = segments.find(([, j]) => j === i)[0];
         v.play();
       }));
+      const step = (d) => {
+        const i = items.findIndex((b) => b.hasAttribute('aria-current'));
+        items[(i + d + items.length) % items.length].click();
+      };
+      document.querySelectorAll('.step').forEach((s) => s.addEventListener('click', () => step(+s.dataset.step)));
+      // Phones: swipe the caption left / right for the next / previous screen
+      let x0;
+      const box = document.querySelector('.screens');
+      box.addEventListener('touchstart', (e) => (x0 = e.touches[0].clientX), { passive: true });
+      box.addEventListener('touchend', (e) => {
+        const dx = e.changedTouches[0].clientX - x0;
+        if (Math.abs(dx) > 40) step(dx < 0 ? 1 : -1);
+      });
       v.addEventListener('timeupdate', () => {
         const cur = items[segments.findLast(([t]) => t <= v.currentTime)[1]];
         items.forEach((b) => b.toggleAttribute('aria-current', b === cur));

@@ -2,13 +2,6 @@
   <!-- Beam-search tree, final frame of the home animation, in white on the dark page background -->
   <rect width="64" height="64" rx="12" fill="#10151C"/>
   <g stroke="#fff" stroke-linecap="round">
-    <path d="M14 30 21 48" stroke-width="2.5" stroke-opacity=".35"/>
-    <g fill="none" stroke-width="1.5" stroke-opacity=".35">
-      <rect x="6.5" y="44.5" width="7" height="7"/>
-      <rect x="17.5" y="44.5" width="7" height="7"/>
-      <rect x="39.5" y="44.5" width="7" height="7"/>
-      <rect x="50.5" y="44.5" width="7" height="7"/>
-    </g>
     <path d="M43 12 14 30M43 12v18l-11 18" stroke-width="3" fill="none"/>
     <g fill="#10151C" stroke-width="3">
       <circle cx="43" cy="12" r="5"/>

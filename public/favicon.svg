@@ -1,20 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Beam-search tree, final frame of the home animation, in white on the dark page background -->
-  <rect width="64" height="64" rx="12" fill="#10151C"/>
-  <g stroke="#fff" stroke-linecap="round">
-    <path d="M14 30 21 48" stroke-width="2.5" stroke-opacity=".35"/>
-    <g fill="none" stroke-width="1.5" stroke-opacity=".35">
-      <rect x="6.5" y="44.5" width="7" height="7"/>
-      <rect x="17.5" y="44.5" width="7" height="7"/>
-      <rect x="39.5" y="44.5" width="7" height="7"/>
-      <rect x="50.5" y="44.5" width="7" height="7"/>
-    </g>
-    <path d="M43 12 14 30M43 12v18l-11 18" stroke-width="3" fill="none"/>
-    <g fill="#10151C" stroke-width="3">
-      <circle cx="43" cy="12" r="5"/>
-      <circle cx="14" cy="30" r="5"/>
-      <circle cx="43" cy="30" r="5"/>
-    </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <style>
+    :root { color: #fff; }
+    @media (prefers-color-scheme: light) {
+      :root { color: #10151C; }
+    }
+  </style>
+  <g stroke="currentColor" stroke-linecap="round" stroke-width="3">
+    <path d="M38.75 14.64 18.25 27.36M43 17v8M40.39 34.27 32 48"/>
+    <circle cx="43" cy="12" r="5"/>
+    <circle cx="14" cy="30" r="5"/>
+    <circle cx="43" cy="30" r="5"/>
   </g>
-  <rect x="27" y="43.5" width="10" height="10" fill="#fff"/>
+  <rect x="27" y="43.5" width="10" height="10" fill="currentColor"/>
 </svg>

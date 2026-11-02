@@ -8,7 +8,7 @@ import { join, extname } from 'node:path';
 
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const PORT = 4329;
-const URL = `http://localhost:${PORT}/XMR4EL/`;
+const URL = `http://localhost:${PORT}/xmr4el-web/`;
 const CYCLE = 6 * 1800; // ms; six steps of 1.8 s, matches the tree script in src/pages/index.astro
 const OUT = 'docs/assets';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -17,7 +17,7 @@ const tmp = mkdtempSync(join(tmpdir(), 'tree-gif-'));
 // Static server for dist/ under the site base (astro preview runs as a shared daemon)
 const types = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.woff2': 'font/woff2', '.mp4': 'video/mp4', '.svg': 'image/svg+xml' };
 const server = createServer((req, res) => {
-  let path = 'dist' + decodeURIComponent(new globalThis.URL(req.url, URL).pathname).replace(/^\/XMR4EL/, '');
+  let path = 'dist' + decodeURIComponent(new globalThis.URL(req.url, URL).pathname).replace(/^\/xmr4el-web/, '');
   if (path.endsWith('/')) path += 'index.html';
   let body;
   try { body = readFileSync(path); } catch { return res.writeHead(404).end(); }

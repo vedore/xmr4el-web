@@ -19,6 +19,7 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
 ---
 <Base>
   <section id="demo" class="wide">
+    <p class="eyebrow wip">Work in progress</p>
     <h1>A configurable research framework for biomedical entity linking.</h1>
     <div class="stage">
       <!-- TUI recording: Notebook (dark) / Notebook light, swapped with the theme -->
@@ -71,14 +72,6 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
       v.addEventListener('timeupdate', () => {
         const cur = items[segments.findLast(([t]) => t <= v.currentTime)[1]];
         items.forEach((b) => b.toggleAttribute('aria-current', b === cur));
-      });
-      // "See it in the TUI" links: data-screen is a screen list index
-      document.addEventListener('click', (e) => {
-        const a = e.target.closest('[data-screen]');
-        if (!a) return;
-        e.preventDefault();
-        items[a.dataset.screen].click();
-        document.getElementById('demo').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
       });
     </script>
   </section>
@@ -179,6 +172,7 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
         </p>
       </li>
     </ol>
+    <div class="tree-fig">
     <svg class="tree" viewBox="0 0 360 140" role="img" aria-label="Illustration: beam search through the label tree, narrowing to one leaf">
       {nodes.filter((n) => n.p !== undefined).map((n) => (
         <line class={n.cls} x1={nodes[n.p].x} y1={nodes[n.p].y} x2={n.x} y2={n.y} />
@@ -187,13 +181,26 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
         ? <rect class={n.cls} x={n.x - 7} y={n.y - 7} width="14" height="14" />
         : <circle class={n.cls} cx={n.x} cy={n.y} r="7" />)}
     </svg>
+    <!-- Step captions are working copy -->
+    <p class="tree-cap" aria-hidden="true"></p>
+    </div>
     <script is:inline>
       const tree = document.querySelector('.tree');
-      const show = (s) => { for (let i = 1; i <= 4; i++) tree.classList.toggle('s' + i, i <= s); };
+      const cap = document.querySelector('.tree-cap');
+      const caps = [
+        'Beam search through the label tree',
+        '1/4 · The query enters at the root.',
+        '2/4 · The beam keeps the best-scoring clusters.',
+        '3/4 · Under those, it keeps the best-scoring leaves.',
+        '4/4 · The top-ranked concept is returned.',
+      ];
+      const show = (s) => {
+        for (let i = 1; i <= 4; i++) tree.classList.toggle('s' + i, i <= s);
+        cap.textContent = caps[Math.min(s, 4)];
+      };
       if (matchMedia('(prefers-reduced-motion: reduce)').matches) show(4);
-      else { let s = 0; setInterval(() => show((s = (s + 1) % 6)), 1100); }
+      else { let s = 0; show(0); setInterval(() => show((s = (s + 1) % 6)), 1800); }
     </script>
-    <p class="tui-link"><a href="#demo" data-screen="6">See it in the TUI · Run Monitor</a></p>
   </section>
 
   <section id="now" class="band">
@@ -214,7 +221,6 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
           The optional terminal interface lets you configure experiment batches, browse saved trees, monitor
           pipeline stages, resources and logs, and compare evaluations with checks on their compatibility.
         </p>
-        <p class="tui-link"><a href="#demo" data-screen="3">See it in the TUI · Model Builder</a></p>
       </article>
       <article>
         <h3>Reproducibility</h3>
@@ -290,25 +296,6 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
       mention keys seen with multiple training labels in both datasets. These keys are lowercased and
       stripped after abbreviation expansion.
     </p>
-    <details>
-      <summary>How to read these numbers</summary>
-    <p>
-      Scores are test Acc@1 over loaded rows whose gold concept has training text. Vocabulary coverage
-      is kept / loaded rows; annotations skipped by the reader are outside this denominator.
-    </p>
-    <p>
-      The 1-NN baselines use the saved tree's training texts and labels, including CTD dictionary rows.
-      PECOS uses exported XMR4EL features. XMR4EL additionally applies nearest-neighbour reweighting and
-      returns 1,000 candidates per query in these runs, versus 100 for PECOS. These are recorded scores
-      from complete configured systems; the benchmark page explains the evidence limits.
-    </p>
-    <p>
-      These results come from one trained tree per dataset at commit <code>aeca7a4</code>. They are not
-      averages across repeated seeds and should not be compared directly with published leaderboard scores.
-      Establishing the hierarchy's independent contribution requires further controlled comparisons.
-    </p>
-    </details>
-    <p class="tui-link"><a href="#demo" data-screen="1">See it in the TUI · Results</a></p>
     <p class="cta">
       <a href={`${base}/benchmarks/`}>Explore the benchmark</a>
       <span>
@@ -353,7 +340,7 @@ uv sync --locked --extra tui
       follow its progress, inspect logs and explore completed evaluations.
     </p>
     <p>
-      See the <a href="https://github.com/lasigeBioTM/XMR4EL#readme">README</a> for installation details,
+      See the <a href="https://github.com/lasigeBioTM/XMR4EL#readme" target="_blank" rel="noopener">README</a> for installation details,
       dataset preparation, command-line training and Python API examples.
     </p>
   </section>
@@ -371,19 +358,21 @@ uv sync --locked --extra tui
     </p>
     <p>Explore the source, report an issue or contribute on GitHub.</p>
     <ul>
-      <li><a href="https://github.com/lasigeBioTM/XMR4EL">Repository</a></li>
-      <li><a href="https://github.com/lasigeBioTM/XMR4EL/issues">Issues</a></li>
-      <li><a href="https://github.com/lasigeBioTM/XMR4EL/blob/main/LICENSE">Licence</a></li>
+      <li><a href="https://github.com/lasigeBioTM/XMR4EL" target="_blank" rel="noopener">Repository</a></li>
+      <li><a href="https://github.com/lasigeBioTM/XMR4EL/issues" target="_blank" rel="noopener">Issues</a></li>
+      <li><a href="https://github.com/lasigeBioTM/XMR4EL/blob/main/LICENSE" target="_blank" rel="noopener">Licence</a></li>
     </ul>
   </section>
 </Base>
 
 <style>
+  .wip { color: var(--accent); margin: 2.5rem 0 0.6rem; }
+  .wip + h1 { margin-top: 0; }
   /* Section rhythm: numbered mono eyebrow (the h2), lead as the headline, alternating full-bleed bands */
   #demo { counter-reset: sec; margin-bottom: 0; }
   section:not(#demo) { counter-increment: sec; margin-block: 0; padding-block: 3.5rem; }
   section:not(#demo) > h2 {
-    font: 600 0.8rem var(--mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 0.75rem;
+    font: 600 1.05rem var(--mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 0.75rem;
   }
   section:not(#demo) > h2::before { content: counter(sec, decimal-leading-zero) '\2002' / ''; color: var(--accent); }
   section .lead { font-size: clamp(1.45rem, 3.2vw, 2rem); line-height: 1.2; max-width: 30ch; margin: 0 0 1.25rem; }
@@ -408,23 +397,26 @@ uv sync --locked --extra tui
     .pipeline li + li::before { content: '↓' / ''; left: 1rem; top: -1.75rem; width: auto; line-height: 1.75rem; }
   }
 
-  .tree { display: block; width: 100%; max-width: 22rem; margin: 0 auto 1rem; }
+  /* Results table fits the column: headers wrap instead of forcing a scroll */
+  #results table { width: 100%; }
+  #results th { white-space: normal; }
+
+  .tree-fig { max-width: 34rem; margin: 2rem auto 1rem; }
+  .tree { display: block; width: 100%; }
   .tree * { transition: opacity 0.4s, stroke 0.4s, fill 0.4s; stroke-width: 1.5; }
   .tree line { stroke: var(--line); }
   .tree circle, .tree rect { fill: var(--bg); stroke: var(--muted); }
   .tree.s1 .root, .tree.s2 .k1, .tree.s3 .k2 { stroke: var(--accent); }
+  .tree.s2 line.k1, .tree.s3 line.k2 { stroke-width: 3; }
   .tree.s2 .x1, .tree.s3 .x2, .tree.s4 .k2:not(.win) { opacity: 0.25; }
   .tree.s4 rect.win { fill: var(--accent); }
+  .tree-cap { min-height: 1.5em; margin: 0.75rem 0 0; text-align: center; font: 0.9rem var(--mono); color: var(--muted); }
 
-  .tui-link { font: 0.9rem var(--mono); }
-  .tui-link a { text-decoration: none; }
-  .tui-link a::before { content: '▶\2002' / ''; font-size: 0.75em; }
 
   .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem; }
   .cards article { padding: 1.25rem; border: 1px solid var(--line); }
   .cards h3 { margin: 0 0 0.5rem; font: 600 1rem var(--mono); }
   .cards p { margin: 0; font-size: 0.95rem; }
-  .cards .tui-link { margin-top: 0.75rem; }
   #where .cards { margin-top: 1.5rem; }
   .cards code { font-size: 0.8rem; color: var(--muted); }
   .forms { list-style: none; padding: 0; margin: 0.75rem 0; }
@@ -460,8 +452,6 @@ uv sync --locked --extra tui
   @media (max-width: 520px) {
     .chart .row { grid-template-columns: 8.5rem minmax(0, 1fr) 3rem; font-size: 0.82rem; gap: 0.5rem; }
   }
-  details { margin: 1rem 0; }
-  summary { cursor: pointer; font-weight: 600; }
 
   .code { position: relative; }
   .code pre { padding-right: 5.5rem; }

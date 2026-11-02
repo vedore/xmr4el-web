@@ -1,0 +1,21 @@
+---
+const { title = 'XMR4EL' } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <header>
+      <nav>
+        <a href={`${base}/`}>XMR4EL</a>
+        <a href="https://github.com/lasigeBioTM/XMR4EL">GitHub</a>
+      </nav>
+    </header>
+    <main><slot /></main>
+  </body>
+</html>

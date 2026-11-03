@@ -102,7 +102,7 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
       const shots = [
         [0, ...W], [0.8, 240, 300], // Dashboard: explorer
         [7.5, 760, 350, 560], [10, 1134, 350, 548], // Results: summary with every tree's Acc@1, then the other trees' columns
-        [15.2, 240, 300], [16.8, 660, 300], // Dataset Setup: dataset list, then split mapping
+        [12.2, 240, 300], [16.8, 660, 300], // Dataset Setup: head left as Results ends, so the dataset list is framed when it appears; then split mapping
         [19.4, ...W], [23.2, 240, 490], [27.4, ...W], // Model Builder: whole pipeline (copy tree, walk to Matcher), the C edit, then the applied result
         [31.6, 745, 300, 640], [34, 240, 490], // Review Batch: the difference, then launch
         [37.2, 240, 300], // Batch Monitor: queue

@@ -478,14 +478,14 @@ uv sync --locked --extra tui
   }
   .pipeline li { position: relative; counter-increment: step; padding: 1rem; background: var(--surface); border: 1px solid var(--line); }
   .pipeline li + li::before {
-    content: '→' / ''; position: absolute; left: -1.75rem; top: 0.9rem; width: 1.75rem; text-align: center; color: var(--accent); font-family: var(--mono);
+    content: '→' / ''; position: absolute; left: -1.75rem; top: 50%; transform: translateY(-50%); width: 1.75rem; text-align: center; color: var(--accent); font-family: var(--mono);
   }
   .pipeline h3 { margin: 0 0 0.4rem; font: 600 0.95rem/1.35 var(--mono); }
   .pipeline h3::before { content: counter(step) '\2002' / ''; color: var(--accent); }
   .pipeline p { margin: 0; font-size: 0.92rem; line-height: 1.5; color: var(--muted); }
   @media (max-width: 900px) {
     .pipeline { grid-template-columns: 1fr; margin-inline: 0; }
-    .pipeline li + li::before { content: '↓' / ''; left: 1rem; top: -1.75rem; width: auto; line-height: 1.75rem; }
+    .pipeline li + li::before { content: '↓' / ''; left: 0; top: -1.75rem; transform: none; width: 100%; line-height: 1.75rem; }
   }
 
   /* Results table fits the column: headers wrap instead of forcing a scroll */

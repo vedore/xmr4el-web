@@ -95,20 +95,20 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
         if (Math.abs(dx) > 40) step(dx < 0 ? 1 : -1);
       });
 
-      // Phone tour: a 4:5 window onto the recording, panned and zoomed like a camera.
+      // Phone tour: a 4:5 window onto the recording, panned and zoomed like a camera. Zoomed in by default; W only where the whole TUI matters.
       // Shots are [second, centre x, centre y, width] in recording pixels (1408×790); W = the whole TUI.
       const END = 62; // recording length (s)
       const W = [704, 395, 1408];
       const shots = [
         [0, ...W], [0.8, 240, 300], // Dashboard: explorer
-        [3.8, ...W], [4.6, 240, 300], [7.5, 640, 340], // Results: baseline + challengers, then the comparison
-        [12.6, ...W], [15.2, 240, 300], [16.8, 660, 300], // Dataset Setup: dataset list, then split mapping
-        [19.4, ...W], [20.2, 300, 300], [22.5, 1000, 330], [24, 240, 490], [26.5, 800, 490], [28.5, 1000, 300], // Model Builder: pipeline, Matcher, C edit, JSON, result
-        [30.76, ...W], [31.6, 745, 300, 640], [34, 240, 490], // Review Batch: the difference, then launch
-        [36.36, ...W], [37.2, 240, 300], // Batch Monitor: queue
-        [40.36, ...W], [41.2, 240, 400], [47.6, 240, 300], [50.6, 240, 400], // Run Monitor: stages, full-screen log, stages
-        [54.36, ...W], [55.2, 720, 490], // Batch Monitor: evaluation results
-        [58.36, ...W], [59.2, 570, 490], [61.2, ...W], // Dashboard: active runs
+        [7.5, 760, 350, 560], [10, 1134, 350, 548], // Results: summary with every tree's Acc@1, then the other trees' columns
+        [15.2, 240, 300], [16.8, 660, 300], // Dataset Setup: dataset list, then split mapping
+        [19.4, ...W], [23.2, 240, 490], [27.4, ...W], // Model Builder: whole pipeline (copy tree, walk to Matcher), the C edit, then the applied result
+        [31.6, 745, 300, 640], [34, 240, 490], // Review Batch: the difference, then launch
+        [37.2, 240, 300], // Batch Monitor: queue
+        [41.2, 240, 400], [47.6, 240, 300], [50.6, 240, 400], // Run Monitor: stages, full-screen log, stages
+        [55.2, 720, 490], // Batch Monitor: evaluation results
+        [59.2, 570, 490], [61.2, ...W], // Dashboard: active runs
       ];
       const frame = document.querySelector('.frame');
       let shot;

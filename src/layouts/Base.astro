@@ -116,7 +116,7 @@ const image = new URL(`${base}/og.png`, Astro.site).href;
         .step { display: block; }
         /* Phone tour: edge-to-edge 4:5 window; the camera script (index.astro) moves the full-size recording inside it */
         .frame { position: relative; overflow: hidden; aspect-ratio: 4 / 5; margin-inline: -16px; background: var(--surface); touch-action: pan-y; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
-        .frame .player { position: absolute; top: 0; left: 0; width: 1408px; max-width: none; height: 790px; border: 0; transform-origin: 0 0; transition: transform 1s ease-in-out; }
+        .frame .player { position: absolute; top: 0; left: 0; width: 1408px; max-width: none; height: 790px; border: 0; transform-origin: 0 0; transition: transform 2s ease-in-out; }
         .tour-bar { display: flex; position: absolute; z-index: 1; inset: 8px 10px auto; gap: 3px; }
         .tour-bar span { height: 3px; background: color-mix(in srgb, var(--muted) 35%, transparent); }
         .tour-bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.25s linear; }

@@ -64,12 +64,9 @@ const image = new URL(`${base}/og.png`, Astro.site).href;
       .site-header > div { max-width: 84rem; margin: 0 auto; padding: 0.75rem 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 1.5rem; }
       .wordmark { font: 600 1.1rem var(--mono); color: var(--text); text-decoration: none; }
       .wordmark .word span { color: var(--accent); }
-      /* Scrolled: the wordmark fades into the tree icon (same drawing as public/favicon.svg) */
-      .wordmark { display: grid; }
-      .wordmark > * { grid-area: 1 / 1; align-self: center; transition: opacity 0.4s ease; }
-      .wordmark svg { width: 1.6em; height: 1.6em; opacity: 0; }
-      .scrolled .wordmark .word { opacity: 0; }
-      .scrolled .wordmark svg { opacity: 1; }
+      /* Tree icon (same drawing as public/favicon.svg) beside the name */
+      .wordmark { display: flex; align-items: center; gap: 0.45em; }
+      .wordmark svg { width: 1.5em; height: 1.5em; order: -1; }
       .site-header nav { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 1.5rem; font: 0.9rem var(--mono); }
       .site-header nav div { display: flex; gap: 0.25rem 1.75rem; }
       .site-header .ext { margin-left: auto; gap: 1.25rem; }
@@ -207,10 +204,6 @@ const image = new URL(`${base}/og.png`, Astro.site).href;
         links.forEach((a) => (a === cur ? a.setAttribute('aria-current', 'location') : a.removeAttribute('aria-current')));
       };
       addEventListener('scroll', mark, { passive: true });
-      const header = document.querySelector('.site-header');
-      const fold = () => header.classList.toggle('scrolled', scrollY > 40);
-      addEventListener('scroll', fold, { passive: true });
-      fold();
       mark();
     </script>
   </body>

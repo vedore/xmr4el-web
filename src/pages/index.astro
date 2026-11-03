@@ -58,13 +58,15 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
         // Theme swap: resume the new recording where the old one was, playing or paused
         const at = v.currentTime, playing = !v.paused;
         v.src = src;
-        if (at) v.addEventListener('loadedmetadata', () => {
+        // Resolves once the new recording shows the same frame, so the theme fade has no blank video
+        if (at) return new Promise((done) => v.addEventListener('loadedmetadata', () => {
+          v.addEventListener('seeked', done, { once: true });
           v.currentTime = at;
           playing ? v.play() : v.pause();
-        }, { once: true });
+        }, { once: true }));
       };
       pick();
-      new MutationObserver(pick).observe(document.documentElement, { attributeFilter: ['data-theme'] });
+      document.addEventListener('themechange', (e) => e.detail.push(pick()));
 
       // [start second, screen list index]; gaps between screens keep the previous highlight
       const segments = [[0, 0], [3.8, 1], [14.4, 2], [19.4, 3], [30.76, 4], [36.36, 5], [40.36, 6], [54.36, 5], [58.36, 0]];

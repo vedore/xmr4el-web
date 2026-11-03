@@ -123,8 +123,9 @@ const image = new URL(`${base}/og.png`, Astro.site).href;
         .screens small { font-size: 0.95rem; }
         .screens [aria-current] small { max-height: 6em; margin-top: 0.3rem; }
         /* 44px round buttons; above the caption, which spans their row */
-        .step { display: grid; place-items: center; position: relative; z-index: 1; grid-row: 1; grid-column: 2; margin: 0.6rem 0 0 0.4rem; font-weight: 400; font-size: 1.1rem; color: var(--muted); border: 1px solid var(--line); border-radius: 50%; }
-        .step:hover, .step:active { color: var(--accent); border-color: var(--accent); opacity: 1; }
+        .step { display: grid; place-items: center; position: relative; z-index: 1; grid-row: 1; grid-column: 2; margin: 0.6rem 0 0 0.4rem; color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); border-radius: 50%; }
+        .step svg { width: 1.1rem; height: 1.1rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .step:hover, .step:active { background: color-mix(in srgb, var(--accent) 22%, transparent); border-color: var(--accent); opacity: 1; }
         .step[data-step="1"] { grid-column: 3; }
         /* Phone tour: edge-to-edge 4:5 window; the camera script (index.astro) moves the full-size recording inside it */
         .frame { position: relative; overflow: hidden; aspect-ratio: 4 / 5; margin-inline: -16px; background: var(--surface); touch-action: pan-y; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }

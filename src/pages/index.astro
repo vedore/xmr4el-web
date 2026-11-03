@@ -35,7 +35,7 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
       <div class="showcase">
         <p class="eyebrow">Terminal UI</p>
         <!-- Descriptions from XMR4EL docs/TUI.md. Buttons seek the recording. -->
-        <button type="button" class="step" data-step="-1" aria-label="Previous screen">←</button>
+        <button type="button" class="step" data-step="-1" aria-label="Previous screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6" /></svg></button>
         <ol class="screens">
           <li><button type="button" aria-current="true"><b data-n="01">Dashboard</b><small>Every saved tree, grouped by dataset, with its evaluations and any runs still going.</small></button></li>
           <li><button type="button"><b data-n="02">Results</b><small>Pin a baseline, add challengers. Deltas appear only when the runs are actually comparable.</small></button></li>
@@ -45,7 +45,7 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
           <li><button type="button"><b data-n="06">Batch Monitor</b><small>Execution order, the selected tree's live log, and a Stop that asks first.</small></button></li>
           <li><button type="button"><b data-n="07">Run Monitor</b><small>One run's pipeline stages, resource use and live log, stage by stage.</small></button></li>
         </ol>
-        <button type="button" class="step" data-step="1" aria-label="Next screen">→</button>
+        <button type="button" class="step" data-step="1" aria-label="Next screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" /></svg></button>
       </div>
     </div>
     <script is:inline define:vars={{ base }}>

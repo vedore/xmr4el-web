@@ -2,3 +2,6 @@ node_modules/
 dist/
 .astro/
 .DS_Store
+# Internal docs: private repo vedore/xmr4el-web-notes; root CLAUDE.md is a symlink into it
+notes/
+CLAUDE.md

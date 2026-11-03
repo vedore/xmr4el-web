@@ -160,6 +160,8 @@ const image = new URL(`${base}/og.png`, Astro.site).href;
       }
       .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
     </style>
+    <!-- Cloudflare Web Analytics -->
+    <script is:inline type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "5bdc583f679244b489606580fdd831b9"}'></script>
   </head>
   <body>
     <header class="site-header">

@@ -19,13 +19,14 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
 ---
 <Base>
   <section id="demo" class="wide">
-    <p class="eyebrow wip">Work in progress</p>
+    <p class="eyebrow wip">Work in progress.</p>
     <h1>Linking biomedical mentions to the concepts they actually mean.</h1>
     <p class="sub">
       XMR4EL treats entity linking as extreme multi-label ranking: a learned tree of concepts decides which
       of thousands of IDs are worth ranking for each mention. It is open research software for finding out where that helps,
       and where a nearest-neighbour lookup was enough all along.
     </p>
+    <p class="eyebrow look">Runs in your terminal, locally, no browser needed.</p>
     <div class="stage">
       <!-- TUI recording: Notebook (dark) / Notebook light, swapped with the theme -->
       <div class="frame">
@@ -162,7 +163,7 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
   </section>
 
   <section id="what">
-    <h2>What it does</h2>
+    <h2>What it does.</h2>
     <p class="lead">“AS” goes in. <code>MESH:D013167</code> comes out. Ideally.</p>
     <p>
       Entity linking maps a mention in text to an identifier in a vocabulary such as MeSH or UMLS, so every
@@ -173,7 +174,7 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
     <p>It links mentions you already have. Finding them in the text is a separate step, outside this project.</p>
     <!-- Worked example from src/data/home-examples.json -->
     <figure class="example">
-      <p class="eyebrow">Example · NCBI-disease test set, PMID {we.source.doc_id}</p>
+      <p class="eyebrow">Example · NCBI-disease test set, PMID {we.source.doc_id}.</p>
       <blockquote>{parts(we.sentence, we.mention).map((t, i) => (i % 2 ? <mark>{t}</mark> : t))}</blockquote>
       <p class="query"><span>Query</span> {we.query}</p>
       <ol>
@@ -195,7 +196,7 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
   </section>
 
   <section id="where" class="band">
-    <h2>Where it helps</h2>
+    <h2>Where it helps.</h2>
     <p class="lead">Biomedical names are many-to-many. That is the whole problem.</p>
     <p>
       In one corpus, a single disease turns up under at least four names, and a single abbreviation names
@@ -229,7 +230,7 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
   </section>
 
   <section id="how">
-    <h2>How it works</h2>
+    <h2>How it works.</h2>
     <p class="lead">Organise the concepts into a tree. Search only the promising branches.</p>
     <ol class="pipeline">
       <li>
@@ -291,7 +292,7 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
   </section>
 
   <section id="now" class="band">
-    <h2>What it accomplishes today</h2>
+    <h2>What it accomplishes today.</h2>
     <p class="lead">It runs end to end today, from training file to a comparison you can defend.</p>
     <div class="cards">
       <article>
@@ -323,7 +324,7 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
   </section>
 
   <section id="results">
-    <h2>How well it does</h2>
+    <h2>How well it does.</h2>
     <p class="lead">Best of four on diseases. Beaten by nearest neighbours on chemicals.</p>
     <p>
       The 2 November 2026 benchmark runs one model configuration on NCBI-disease and BC5CDR-chemical,
@@ -400,7 +401,7 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
   </section>
 
   <section id="try" class="band">
-    <h2>Try it</h2>
+    <h2>Try it.</h2>
     <p class="lead">Four commands to the terminal UI. Datasets not included.</p>
     <p>
       You need Python 3.12+ and uv. The first transformer run downloads SapBERT from Hugging Face unless
@@ -436,7 +437,7 @@ uv sync --locked --extra tui
   </section>
 
   <section id="cite">
-    <h2>Who made it &amp; how to cite</h2>
+    <h2>Who made it &amp; how to cite.</h2>
     <p class="lead">Open source under MIT. Issues welcome; bugs less so.</p>
     <p>
       XMR4EL was created by João Vedor and is hosted in the lasigeBioTM GitHub organisation.
@@ -456,6 +457,7 @@ uv sync --locked --extra tui
 <style>
   .wip { color: var(--accent); margin: 2.5rem 0 0.6rem; }
   .wip + h1 { margin-top: 0; }
+  .look { color: var(--accent); }
   #demo h1:has(+ .sub) { margin-bottom: 0.75rem; }
   .sub { max-width: 62ch; margin: 0 0 2rem; font-size: 1.15rem; color: var(--muted); }
   .scope { margin: 1rem 0 0; font-size: 0.9rem; }

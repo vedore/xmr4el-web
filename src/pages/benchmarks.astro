@@ -87,31 +87,34 @@ const pecosGroups = [
       Annotations already skipped by the reader are outside this denominator. Metrics follow XMR4EL
       evaluation protocol <strong>1</strong>.
     </p>
-    <dl>
+    <dl class="glossary">
       <dt>Acc@1</dt>
       <dd>
         The fraction of in-vocabulary rows whose first prediction equals the gold identifier.
         Gold concepts without training text are excluded. Kept / loaded counts appear in the
         dataset-size table.
       </dd>
-      <dt>Acc@1_all (“cov × acc” in the report)</dt>
+      <dt>Acc@1_all <span>“cov × acc” in the report</span></dt>
       <dd>Correct first predictions / all loaded rows, counting out-of-vocabulary gold concepts as misses.</dd>
       <dt>Vocabulary coverage</dt>
       <dd>The proportion of loaded rows that are in vocabulary (kept / loaded).</dd>
       <dt>MRR</dt>
       <dd>Mean reciprocal rank of the gold concept over in-vocabulary rows; missing gold contributes zero.</dd>
-      <dt>Recall@10 (R@10)</dt>
+      <dt>Recall@10 <span>R@10</span></dt>
       <dd>The fraction of in-vocabulary rows with the gold concept in the first ten predictions.</dd>
-      <dt>Candidate recall (R@cand)</dt>
+      <dt>Candidate recall <span>R@cand</span></dt>
       <dd>The fraction of in-vocabulary rows with the gold concept anywhere in the returned candidate scores.</dd>
       <dt>Mention-string groups</dt>
       <dd>
         Acc@1 per in-vocabulary group. Keys use text before <code>[SEP]</code>, stripped and lowercased
-        after the configured abbreviation expansion. <em>Seen 1</em>: the key occurs in training with one
-        distinct label. <em>Seen &gt;1</em>: it occurs with several labels. <em>Unseen</em>: it does not
-        occur in training.
+        after the configured abbreviation expansion.
+        <ul>
+          <li><b>Seen 1</b>: the key occurs in training with one distinct label.</li>
+          <li><b>Seen &gt;1</b>: it occurs with several labels.</li>
+          <li><b>Unseen</b>: it does not occur in training.</li>
+        </ul>
       </dd>
-      <dt>Hybrid (diagnostic)</dt>
+      <dt>Hybrid <span>diagnostic</span></dt>
       <dd>
         A seen mention key maps to its majority training label; otherwise the system's first prediction
         is used. The denominator is in-vocabulary rows.

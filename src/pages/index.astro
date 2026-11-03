@@ -37,13 +37,13 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
         <!-- Descriptions from XMR4EL docs/TUI.md. Buttons seek the recording. -->
         <button type="button" class="step" data-step="-1" aria-label="Previous screen">←</button>
         <ol class="screens">
-          <li><button type="button" aria-current="true"><b>Dashboard</b><small>Every saved tree, grouped by dataset, with its evaluations and any runs still going.</small></button></li>
-          <li><button type="button"><b>Results</b><small>Pin a baseline, add challengers. Deltas appear only when the runs are actually comparable.</small></button></li>
-          <li><button type="button"><b>Dataset Setup</b><small>Pick a recognised dataset or register your own PubTator files, then map the splits.</small></button></li>
-          <li><button type="button"><b>Model Builder</b><small>Configure one or more trees; each edit is validated before it is applied.</small></button></li>
-          <li><button type="button"><b>Review Batch</b><small>See how the trees differ, fix issues, launch. Launching takes two keypresses, on purpose.</small></button></li>
-          <li><button type="button"><b>Batch Monitor</b><small>Execution order, the selected tree's live log, and a Stop that asks first.</small></button></li>
-          <li><button type="button"><b>Run Monitor</b><small>One run's pipeline stages, resource use and live log, stage by stage.</small></button></li>
+          <li><button type="button" aria-current="true"><b data-n="01">Dashboard</b><small>Every saved tree, grouped by dataset, with its evaluations and any runs still going.</small></button></li>
+          <li><button type="button"><b data-n="02">Results</b><small>Pin a baseline, add challengers. Deltas appear only when the runs are actually comparable.</small></button></li>
+          <li><button type="button"><b data-n="03">Dataset Setup</b><small>Pick a recognised dataset or register your own PubTator files, then map the splits.</small></button></li>
+          <li><button type="button"><b data-n="04">Model Builder</b><small>Configure one or more trees; each edit is validated before it is applied.</small></button></li>
+          <li><button type="button"><b data-n="05">Review Batch</b><small>See how the trees differ, fix issues, launch. Launching takes two keypresses, on purpose.</small></button></li>
+          <li><button type="button"><b data-n="06">Batch Monitor</b><small>Execution order, the selected tree's live log, and a Stop that asks first.</small></button></li>
+          <li><button type="button"><b data-n="07">Run Monitor</b><small>One run's pipeline stages, resource use and live log, stage by stage.</small></button></li>
         </ol>
         <button type="button" class="step" data-step="1" aria-label="Next screen">→</button>
       </div>

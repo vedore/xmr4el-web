@@ -288,6 +288,11 @@ const pecosGroups = [
       100 predictions. MRR is also restricted to each system's returned predictions: 100 for PECOS,
       1,000 for XMR4EL in these runs. The 1-NN baselines rank the full training vocabulary.
     </p>
+    <p>
+      PECOS has no mention-level reweighting. With reweighting disabled (beta 0, <a href="#ablation">section 4</a>),
+      XMR4EL scores below PECOS on every split: by 0.2 points on NCBI-disease dev and 6–22 points elsewhere.
+      The gap in this table therefore comes from the nearest-neighbour stage, not from the tree alone.
+    </p>
   </section>
 
   <section id="ablation">

@@ -28,7 +28,10 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
     </p>
     <div class="stage">
       <!-- TUI recording: Notebook (dark) / Notebook light, swapped with the theme -->
-      <video class="player" muted loop playsinline aria-label="Recording of the XMR4EL terminal UI"></video>
+      <div class="frame">
+        <div class="tour-bar" aria-hidden="true"></div>
+        <video class="player" muted loop playsinline aria-label="Recording of the XMR4EL terminal UI"></video>
+      </div>
       <div class="showcase">
         <p class="eyebrow">Terminal UI</p>
         <!-- Descriptions from XMR4EL docs/TUI.md. Buttons seek the recording. -->
@@ -50,7 +53,8 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
       // Reduced motion: no autoplay; click toggles play/pause either way
       const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
       v.autoplay = !reduce;
-      v.addEventListener('click', () => (v.paused ? v.play() : v.pause()));
+      const phone = matchMedia('(max-width: 760px)');
+      v.addEventListener('click', () => phone.matches || (v.paused ? v.play() : v.pause()));
       const pick = () => {
         const dark = document.documentElement.dataset.theme === 'dark';
         const src = `${base}/recordings/xmr4el-tui-demo-notebook${dark ? '' : '-light'}.mp4`;
@@ -75,9 +79,11 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
         v.currentTime = segments.find(([, j]) => j === i)[0];
         v.play();
       }));
+      // Previous / next part of the recording (screens that come back, like Batch Monitor, count twice)
       const step = (d) => {
-        const i = items.findIndex((b) => b.hasAttribute('aria-current'));
-        items[(i + d + items.length) % items.length].click();
+        const i = segments.findLastIndex(([t]) => t <= v.currentTime);
+        v.currentTime = segments[(i + d + segments.length) % segments.length][0];
+        v.play();
       };
       document.querySelectorAll('.step').forEach((s) => s.addEventListener('click', () => step(+s.dataset.step)));
       // Phones: swipe the caption left / right for the next / previous screen
@@ -88,10 +94,70 @@ const nodes = [{ x: 180, y: 14, cls: 'root' }];
         const dx = e.changedTouches[0].clientX - x0;
         if (Math.abs(dx) > 40) step(dx < 0 ? 1 : -1);
       });
+
+      // Phone tour: a 4:5 window onto the recording, panned and zoomed like a camera.
+      // Shots are [second, centre x, centre y, width] in recording pixels (1408×790); W = the whole TUI.
+      const END = 62; // recording length (s)
+      const W = [704, 395, 1408];
+      const shots = [
+        [0, ...W], [0.8, 240, 300], // Dashboard: explorer
+        [3.8, ...W], [4.6, 240, 300], [7.5, 640, 340], // Results: baseline + challengers, then the comparison
+        [12.6, ...W], [15.2, 240, 300], [16.8, 660, 300], // Dataset Setup: dataset list, then split mapping
+        [19.4, ...W], [20.2, 300, 300], [22.5, 1000, 330], [24, 240, 490], [26.5, 800, 490], [28.5, 1000, 300], // Model Builder: pipeline, Matcher, C edit, JSON, result
+        [30.76, ...W], [31.6, 745, 300, 640], [34, 240, 490], // Review Batch: the difference, then launch
+        [36.36, ...W], [37.2, 240, 300], // Batch Monitor: queue
+        [40.36, ...W], [41.2, 240, 400], [47.6, 240, 300], [50.6, 240, 400], // Run Monitor: stages, full-screen log, stages
+        [54.36, ...W], [55.2, 720, 490], // Batch Monitor: evaluation results
+        [58.36, ...W], [59.2, 570, 490], [61.2, ...W], // Dashboard: active runs
+      ];
+      const frame = document.querySelector('.frame');
+      let shot;
+      const aim = (force) => {
+        if (!phone.matches) return (v.style.transform = '');
+        const s = shots.findLast(([t]) => t <= v.currentTime);
+        if (s === shot && !force) return;
+        shot = s;
+        const [, cx, cy, w = 480] = s;
+        const F = frame.clientWidth, H = frame.clientHeight, k = F / w;
+        // Centre (cx, cy) without showing past the recording's edges; centre the recording if it's smaller than the frame
+        const fit = (c, size, view) => (size * k <= view ? (view - size * k) / 2 : Math.min(0, Math.max(view - size * k, view / 2 - c * k)));
+        v.style.transform = `translate(${fit(cx, 1408, F)}px, ${fit(cy, 790, H)}px) scale(${k})`;
+      };
+      addEventListener('resize', () => aim(true));
+      v.addEventListener('seeked', () => aim());
+
+      // Progress bar: one piece per part of the recording, sized by its length
+      const bar = document.querySelector('.tour-bar');
+      const span = (i) => [segments[i][0], segments[i + 1]?.[0] ?? END];
+      bar.innerHTML = segments.map((_, i) => `<span style="flex:${span(i)[1] - span(i)[0]}"><i></i></span>`).join('');
+      const fills = [...bar.querySelectorAll('i')];
+
+      // Phones: tap the left / right half of the frame for the previous / next part; hold to pause
+      let timer, held;
+      frame.addEventListener('pointerdown', () => {
+        if (!phone.matches) return;
+        held = false;
+        timer = setTimeout(() => { held = !v.paused; v.pause(); }, 300);
+      });
+      frame.addEventListener('pointercancel', () => clearTimeout(timer));
+      frame.addEventListener('pointerup', (e) => {
+        if (!phone.matches) return;
+        clearTimeout(timer);
+        if (held) return v.play();
+        const r = frame.getBoundingClientRect();
+        step(e.clientX < r.left + r.width / 2 ? -1 : 1);
+      });
+
       v.addEventListener('timeupdate', () => {
         const cur = items[segments.findLast(([t]) => t <= v.currentTime)[1]];
         items.forEach((b) => b.toggleAttribute('aria-current', b === cur));
+        fills.forEach((f, i) => {
+          const [a, b] = span(i);
+          f.style.width = `${Math.min(1, Math.max(0, (v.currentTime - a) / (b - a))) * 100}%`;
+        });
+        aim();
       });
+      aim();
     </script>
   </section>
 
